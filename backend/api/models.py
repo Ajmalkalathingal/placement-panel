@@ -1,8 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.db import models
-from django.utils import timezone
-
-
 
 
 # Custom User Manager
@@ -72,46 +69,53 @@ class User(AbstractBaseUser,PermissionsMixin):
         return f'{self.email} - {self.user_type}'
     
 
-# Student Profile
-class StudentProfile(models.Model):
+class StudentRegistration(models.Model):
     COURSE_CHOICES = (
         ('MBA', 'MBA'),
         ('BBA', 'BBA'),
         ('MCA', 'MCA'),
-        # Add more courses 
+        # Add more courses
     )
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'student'})
-    enrollment_number = models.CharField(max_length=20, unique=True, blank=True)
-    branch = models.CharField(max_length=50, null=True, blank=True)
-    graduation_year = models.IntegerField(null=True, blank=True)
-    course = models.CharField(max_length=3, choices=COURSE_CHOICES)
-    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if not self.enrollment_number:
-            current_year = timezone.now().year
-
-    
-            latest_student = StudentProfile.objects.filter(
-                course=self.course,
-                enrollment_number__startswith=f"{self.course}-{current_year}"
-            ).order_by('enrollment_number').last()
-
-            if latest_student:
-                last_enrollment_number = latest_student.enrollment_number
-                last_sequence = int(last_enrollment_number.split('-')[-1])
-                new_sequence = last_sequence + 1
-            else:
-                new_sequence = 1
-
-            self.enrollment_number = f"{self.course}-{current_year}-{new_sequence:03d}"
-
-        super().save(*args, **kwargs)
+    student_id = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(unique=True)
+    registration_code = models.CharField(max_length=100, null=True, blank=True)
+    is_registered = models.BooleanField(default=False) 
+    course = models.CharField(max_length=10, choices=COURSE_CHOICES, null=True, blank=True) 
 
     def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name} - {self.enrollment_number}'
+        return f'{self.student_id} - {self.email} - Course: {self.course} - Registered: {self.is_registered}'
+    
 
+class CoordinatorRegistration(models.Model):
+    coordinator_id = models.CharField(max_length=20, unique=True)  
+    email = models.EmailField(unique=True)
+    registration_code = models.CharField(max_length=100, null=True, blank=True)  
+    is_registered = models.BooleanField(default=False) 
+
+    def __str__(self):
+        return f'{self.coordinator_id} - {self.email} - Registered: {self.is_registered}'
+
+    
+
+# Student Profile Model
+class StudentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'student'})
+    registration = models.OneToOneField(StudentRegistration, on_delete=models.CASCADE, related_name='profile') 
+    graduation_year = models.IntegerField(null=True, blank=True)
+    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'
+
+# CoordinatorProfile model 
+class CoordinatorProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'coordinator'})
+    registration = models.OneToOneField(CoordinatorRegistration, on_delete=models.CASCADE, related_name='profile')
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'
+    
 
 # Recruiter Profile
 class RecruiterProfile(models.Model):
@@ -127,13 +131,6 @@ class RecruiterProfile(models.Model):
         return f'{self.user.first_name} {self.user.last_name} - {self.company_name}'
     
 
-class CoordinatorProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'coordinator'})
-    coordinator_id = models.CharField(max_length=20, unique=True) 
-
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name} - {self.coordinator_id}'
-    
 
 class verifierProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'verifier'})

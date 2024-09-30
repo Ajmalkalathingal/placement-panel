@@ -4,15 +4,16 @@ from rest_framework.views import APIView
 from rest_framework import serializers
 from rest_framework.permissions import AllowAny
 from rest_framework import generics
-from .permissions import IsStudent,IsCoordinator,IsRecruiter
+from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import StudentProfile,RecruiterProfile,Job
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration
 
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
         RecruiterProfileSerializer,
         CustomTokenObtainPairSerializer,
-        JobSerializer
+        JobSerializer,
+        RegistredStudentSerializer
         )   
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
@@ -45,6 +46,7 @@ class RecruiterSignupView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CoordinatorSignupView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         data = request.data.copy()
         data['user_type'] = 'coordinator'
@@ -55,6 +57,7 @@ class CoordinatorSignupView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifierSignupView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         data = request.data.copy()
         data['user_type'] = 'verifier'
@@ -73,6 +76,22 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 # student list and update profile
+class RegistredStudentListView(generics.ListAPIView):
+    queryset = StudentRegistration.objects.all()  
+    serializer_class = RegistredStudentSerializer
+    permission_classes = [IsAuthenticated,IsCoordinator|IsVerifier] 
+
+class RegisteredStudentUpdateView(generics.UpdateAPIView):
+    queryset = StudentRegistration.objects.all()
+    serializer_class = RegistredStudentSerializer
+    permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]
+
+class RegisteredStudentDeleteView(generics.DestroyAPIView):
+    queryset = StudentRegistration.objects.all()
+    serializer_class = RegistredStudentSerializer
+    permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]        
+
+
 class StudentListView(generics.ListAPIView):
     queryset = StudentProfile.objects.all()  
     serializer_class = StudentProfileSerializer

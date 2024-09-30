@@ -1,44 +1,78 @@
 from rest_framework import serializers
-from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job
+from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration
+from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # user creation and authentication serializers
 class UserSerializer(serializers.ModelSerializer):
-    course = serializers.ChoiceField(choices=StudentProfile.COURSE_CHOICES, required=False)
+    student_id = serializers.CharField(write_only=True, required=False) 
+    coordinator_id = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
-        fields = ('id','email', 'first_name', 'last_name', 'password', 'user_type','course')
+        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'user_type', 'student_id','coordinator_id')
         extra_kwargs = {'password': {'write_only': True}}
-        
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        user_type = attrs.get('user_type')
+        student_id = attrs.get('student_id')
+        coordinator_id = attrs.get('coordinator_id')
+
+        if user_type == 'student':
+            try:
+                student_registration = StudentRegistration.objects.get(student_id=student_id)
+                if student_registration.is_registered:
+                    raise ValidationError("This student has already registered.")
+            except StudentRegistration.DoesNotExist:
+                raise ValidationError("This student ID is not pre-registered.")
+            
+        # Validate for coordinators
+        elif user_type == 'coordinator':
+            try:
+                Coordinator_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
+                if Coordinator_registration.is_registered:
+                    raise ValidationError("This coordinator has already registered.")
+            except CoordinatorRegistration.DoesNotExist:
+                raise ValidationError("This coordinator ID and email combination is not pre-registered.")
+    
+        return attrs
+    
+
     def create(self, validated_data):
         password = validated_data.pop('password')
-        course = validated_data.pop('course', None)
+        student_id = validated_data.pop('student_id',None)
+        coordinator_id = validated_data.pop('coordinator_id', None)
 
-        # create user
+        # Create user
         user = User(**validated_data)
         user.set_password(password)
         user.save()
 
-        # Create StudentProfile if user_type is 'student'
-        if user.user_type == 'student':
-            if not course:
-                raise serializers.ValidationError("Course is required for students.")
-
+        if validated_data.get('user_type') == 'student':
+            student_registration = StudentRegistration.objects.get(student_id=student_id)
+            student_registration.is_registered = True 
+            student_registration.save()
             StudentProfile.objects.create(
                 user=user,
-                course=course
+                registration=student_registration
             )
-        elif user.user_type == 'coordinator':
+
+        elif validated_data.get('user_type') == 'coordinator':
+            student_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
+            student_registration.is_registered = True 
+            student_registration.save()
             CoordinatorProfile.objects.create(
                 user=user,
+                registration=student_registration
             )
+
         elif user.user_type == 'recruiter':
             RecruiterProfile.objects.create(
                 user=user,
             )
-        print(user,'hh')        
         return user
     
 
@@ -62,6 +96,11 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         }
 
     # -------------------------------------------------------------------------------------------------#
+class RegistredStudentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = StudentRegistration
+        fields = "__all__" 
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
