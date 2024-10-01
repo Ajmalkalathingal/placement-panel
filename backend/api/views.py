@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,User
 
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
@@ -75,7 +75,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 
-# student list and update profile
+# student registration
 class RegistredStudentListView(generics.ListAPIView):
     queryset = StudentRegistration.objects.all()  
     serializer_class = RegistredStudentSerializer
@@ -97,6 +97,20 @@ class StudentListView(generics.ListAPIView):
     serializer_class = StudentProfileSerializer
     permission_classes = [IsAuthenticated]  
 
+        
+class StudentProfileView(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
+
+    def get(self, request):
+        try:
+            user = request.user
+            student_profile = StudentProfile.objects.get(user=user)
+            serializer = StudentProfileSerializer(student_profile)
+            return Response(serializer.data)
+        except StudentProfile.DoesNotExist:
+            return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class StudentProfileUpdateView(generics.UpdateAPIView):
     serializer_class = StudentProfileSerializer
@@ -150,6 +164,20 @@ class RecruiterListView(generics.ListAPIView):
     serializer_class = RecruiterProfileSerializer
     permission_classes = [IsAuthenticated]  # Only authenticated users can view the list
 
+class RecruiterProfileView(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
+
+    def get(self, request):
+        try:
+            user = request.user
+            student_profile = RecruiterProfile.objects.get(user=user)
+            serializer = RecruiterProfileSerializer(student_profile)
+            return Response(serializer.data)
+        except StudentProfile.DoesNotExist:
+            return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 # Recruiter Profile Update View
 class RecruiterProfileUpdateView(generics.UpdateAPIView):
     serializer_class = RecruiterProfileSerializer

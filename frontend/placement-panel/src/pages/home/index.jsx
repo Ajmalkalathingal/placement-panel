@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Nav from "../../componets/nav"
 import './style.css';
 
@@ -13,7 +14,7 @@ const Home = () => {
         <h1 class="display-4 fw-bold lh-1 text-body-emphasis">Border hero with cropped image and shadows</h1>
         <p class="lead">Quickly design and customize responsive mobile-first sites with Bootstrap, the world’s most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins.</p>
         <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
-          <button type="button" class="btn btn-primary btn-lg px-4 me-md-2 " fdprocessedid="wpmzpd">Student</button>
+          <Link to={'/signup-for-student'} type="button" class="btn btn-primary btn-lg px-4 me-md-2 " fdprocessedid="wpmzpd">Student</Link>
           <button type="button" class="btn btn-primary btn-lg px-4" fdprocessedid="m69i5w">Rricruter</button>
           <button type="button" class="btn btn-primary btn-lg px-4 me-md-2 " fdprocessedid="wpmzpd">coordinator</button>
           <button type="button" class="btn btn-primary btn-lg px-4" fdprocessedid="m69i5w">Verify</button>

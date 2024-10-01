@@ -79,6 +79,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CustomTokenObtainPairSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
     password = serializers.CharField(write_only=True)
+    user = UserSerializer(read_only=True)
     
     def validate(self, attrs):
         email = attrs.get('email')
@@ -93,6 +94,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user_type': user.user_type,
+            'user' : user.first_name
         }
 
     # -------------------------------------------------------------------------------------------------#
