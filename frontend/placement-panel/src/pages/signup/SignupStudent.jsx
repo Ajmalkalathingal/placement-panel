@@ -1,20 +1,20 @@
-import { useState } from "react";
-import Input from "../input/input";
-import "./style.css";
-import Button from "../button";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import api from "../../api";
-import axios from "axios";
 
-function SignupSigninComponents() {
+
+import { useState } from "react";
+import Input from "../../componets/input/input";
+import "./style.css";
+import Button from "../../componets/button";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../api";
+
+function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [registrationId, setRegistrationId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loginForm, setLoginForm] = useState(false);
   const navigate = useNavigate();
 
   // Signup function for student
@@ -30,9 +30,9 @@ function SignupSigninComponents() {
     setLoading(true);
 
     // Prepare the data to send
-    let student_id = registrationId;
+    let coordinator_id = registrationId;
     let data = {
-      student_id,
+      coordinator_id,
       email,
       password,
       first_name: name,
@@ -43,23 +43,11 @@ function SignupSigninComponents() {
     console.log(data);
 
     try {
-      const response = await api.post("/api/signup/student/", data);
+      const response = await api.post("/api/signup/coordinator/", data);
 
       console.log(response.data);
       toast.success("Registration successful!");
 
-      // Store tokens in localStorage
-      const tokenResponse = await api.post("/api/token/",data);
-      console.log(tokenResponse)
-      if (tokenResponse) {
-        localStorage.setItem("ACCESS_TOKEN", tokenResponse.access_token);
-        localStorage.setItem("REFRESH_TOKEN", tokenResponse.refresh_token);
-        toast.success("Tokens stored successfully!");
-      } else {
-        toast.error("Tokens are missing from the response.");
-      }
-
-      // Redirect or navigate to the login page after successful registration
       navigate("/login");
     } catch (error) {
       if (error.response) {
@@ -76,48 +64,12 @@ function SignupSigninComponents() {
     }
   };
 
-  const studentSignupp = () => {
-    console.log("data");
-  };
   return (
     <>
-      {loginForm ? (
+        <div className="wrapper">
         <div className="signup-wrapper">
           <h2 className="title">
-            Login on <span style={{ color: "#2970ff" }}>AppName</span>
-          </h2>
-          <form>
-            <Input
-              label="Email"
-              type="email"
-              state={email}
-              setState={setEmail}
-              placeholder="Enter your email"
-            />
-            <Input
-              label="Password"
-              type="password"
-              state={password}
-              setState={setPassword}
-              placeholder="Enter password"
-            />
-            <Button
-              disabled={loading}
-              text={loading ? "Loading" : "Login with Email"}
-              onClick={studentSignup} // Use the correct handler
-            />
-            <p
-              style={{ textAlign: "center", cursor: "pointer" }}
-              onClick={() => setLoginForm(!loginForm)}
-            >
-              Don't have an account? Click here to sign up.
-            </p>
-          </form>
-        </div>
-      ) : (
-        <div className="signup-wrapper">
-          <h2 className="title">
-            Sign up on <span style={{ color: "#2970ff" }}>AppName</span>
+            Sign up on <span style={{ color: "#2970ff" }}>Student</span>
           </h2>
           <form onSubmit={studentSignup}>
             <Input
@@ -157,27 +109,23 @@ function SignupSigninComponents() {
             />
             <Button
               disabled={loading}
-              text={loading ? "Loading" : "Sign up using Email"}
+              text={loading ? "Loading" : "Sign up "}
               onClick={studentSignup}
             />
-            <p
+            <Link to={'/login'}
               style={{ textAlign: "center", cursor: "pointer" }}
-              onClick={() => setLoginForm(!loginForm)}
             >
               Already have an account? Click here to login.
-            </p>
+            </Link>
           </form>
         </div>
-      )}
+      </div>
 
-      <Button
-        disabled={loading}
-        text={"Sign up using Email"}
-        onClick={studentSignupp}
-      />
+      
       <button onClick={studentSignup}>wwwwww</button>
     </>
   );
 }
 
-export default SignupSigninComponents;
+export default Signup;
+

@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState} from "react";
 import Input from "../../componets/input/input";
 import "./style.css";
 import Button from "../../componets/button";
 import { toast } from "react-toastify";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import api from "../../api";
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../../constant";
 
@@ -12,8 +11,15 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isAutherized, setIsAutherized] = useState(null);
   const navigate = useNavigate();
+
+    // Check if user is already logged in
+    useEffect(() => {
+      const accessToken = localStorage.getItem(ACCESS_TOKEN);
+      if (accessToken) {
+        navigate("/profile");  // Redirect to profile if access token exists
+      }
+    }, [navigate]);
 
   const studentLogin = async (e) => {
     e.preventDefault();
@@ -25,15 +31,18 @@ function Login() {
       const tokenResponse = await api.post("/api/token/", data);
       console.log(tokenResponse)
       if (tokenResponse.data) {
-        const { access, refresh } = tokenResponse.data;
-        localStorage.setItem(ACCESS_TOKEN, access);
-        localStorage.setItem(REFRESH_TOKEN, refresh);
+
+        localStorage.setItem(ACCESS_TOKEN, tokenResponse.data.access);
+        localStorage.setItem(REFRESH_TOKEN, tokenResponse.data.refresh);
+        localStorage.setItem('userType', tokenResponse.data.user_type);
+        localStorage.setItem('username', tokenResponse.data.username);
+
         toast.success("Login successful!");
 
-        const decodedToken = jwtDecode(access);
-        navigate(`/student-profile`);
+        navigate(`/profile`);
       } else {
         toast.error("Login failed. Please try again.");
+        navigate(`/login`);
       }
     } catch (error) {
       if (error.response) {
@@ -45,54 +54,6 @@ function Login() {
       setLoading(false);
     }
   };
-
-  const refreshToken = async () => {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-    if (!refreshToken) {
-      setIsAutherized(false);
-      return;
-    }
-    try {
-      const res = await api.post('/api/token/refresh/', { refresh: refreshToken });
-      if (res.status === 200) {
-        localStorage.setItem(ACCESS_TOKEN, res.data.access);
-        setIsAutherized(true);
-      } else {
-        setIsAutherized(false);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsAutherized(false);
-    }
-  };
-
-  const auth = async () => {
-    const token = localStorage.getItem(ACCESS_TOKEN);
-    if (!token) {
-      setIsAutherized(false);
-      return;
-    }
-
-    const decoded = jwtDecode(token);
-    const tokenExpiry = decoded.exp;
-    const now = Date.now() / 1000;
-
-    if (now > tokenExpiry) {
-      await refreshToken();
-    } else {
-      setIsAutherized(true);
-    }
-  };
-
-  useEffect(() => {
-    auth().catch(() => { setIsAutherized(false) });
-  }, []);
-
-  if (isAutherized === null) {
-    return <div>Loading...</div>;
-  } else if (isAutherized) {
-    return navigate(`/student-profile/`);;
-  }
 
   return (
     <div className="wrapper">

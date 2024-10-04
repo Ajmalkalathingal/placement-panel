@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,User
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile
 
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
@@ -226,7 +226,6 @@ class RecruiterProfileDeleteView(generics.DestroyAPIView):
         return Response({"detail": "Recruiter profile deleted successfully."}, status=204)    
 
 
-
 from .tasks import send_job_post_email_to_students
 class JobCreateView(generics.CreateAPIView):
     queryset = Job.objects.all()
@@ -257,3 +256,17 @@ class JobCreateView(generics.CreateAPIView):
 
         # Send the email using an asynchronous task (using Celery)
         send_job_post_email_to_students.delay(subject, message, list(student_emails))
+
+
+class CordinatorProfileView(APIView):
+    permission_classes = [IsAuthenticated] 
+    def get(self, request):
+        try:
+            user = request.user
+            student_profile = CoordinatorProfile.objects.get(user=user)
+            serializer = StudentProfileSerializer(student_profile)
+            return Response(serializer.data)
+        except StudentProfile.DoesNotExist:
+            return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

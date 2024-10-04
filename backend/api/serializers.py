@@ -61,12 +61,13 @@ class UserSerializer(serializers.ModelSerializer):
             )
 
         elif validated_data.get('user_type') == 'coordinator':
-            student_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
-            student_registration.is_registered = True 
-            student_registration.save()
+            coordinator_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
+            coordinator_registration.is_registered = True
+            coordinator_registration.user = user  
+            coordinator_registration.save()
             CoordinatorProfile.objects.create(
                 user=user,
-                registration=student_registration
+                registration=coordinator_registration
             )
 
         elif user.user_type == 'recruiter':
@@ -118,6 +119,14 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True) 
     class Meta:
         model = RecruiterProfile
+        fields = '__all__'        
+        read_only_fields = ['user']
+
+
+class CoordinatorProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True) 
+    class Meta:
+        model = CoordinatorProfile
         fields = '__all__'        
         read_only_fields = ['user']
 

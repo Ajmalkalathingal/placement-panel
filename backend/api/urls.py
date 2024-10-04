@@ -20,6 +20,7 @@ from .views import (
     RegisteredStudentDeleteView,
     RegisteredStudentUpdateView,
 
+    CordinatorProfileView,
 
 )
 
@@ -53,6 +54,9 @@ urlpatterns = [
     path('registred-student-list/', RegistredStudentListView.as_view(), name='recruiter-delete'),
     path('registred-student/<int:pk>/update/', RegisteredStudentUpdateView.as_view(), name='recruiter-delete'),
     path('registred-student/<int:pk>/delete/', RegisteredStudentDeleteView.as_view(), name='recruiter-delete'),
+
+    # CoordinatorProfile
+    path('coordinators/profile/', CordinatorProfileView.as_view(), name='recruiter-delete'),
 
 
 ]
