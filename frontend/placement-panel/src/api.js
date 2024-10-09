@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 // Create an instance of axios
 const api = axios.create({
-    baseURL: 'http://localhost:8000',  // Adjust to your API base URL
+    baseURL: 'http://localhost:8000', 
 });
 
 // Request interceptor to add the access token to headers
@@ -36,13 +36,12 @@ api.interceptors.response.use(
             const refreshToken = localStorage.getItem(REFRESH_TOKEN);
             if (refreshToken) {
                 try {
-                    // Request a new access token using the refresh token
                     const tokenResponse = await axios.post('http://localhost:8000/api/token/refresh/', {
                         refresh: refreshToken,
                     });
 
                     const newAccessToken = tokenResponse.data.access;
-                    localStorage.setItem(ACCESS_TOKEN, newAccessToken);  // Store the new access token
+                    localStorage.setItem(ACCESS_TOKEN, newAccessToken); 
 
                     // Update the Authorization header and retry the original request
                     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -53,7 +52,7 @@ api.interceptors.response.use(
                     toast.error("Session expired. Please log in again.");
                     localStorage.removeItem(ACCESS_TOKEN);
                     localStorage.removeItem(REFRESH_TOKEN);
-                    window.location.href = '/login';  // Redirect to login page
+                    window.location.href = '/login'; 
                 }
             } else {
                 // No refresh token available, log the user out
@@ -64,9 +63,14 @@ api.interceptors.response.use(
             }
         }
 
-        return Promise.reject(error);  // Return any other errors
+        return Promise.reject(error); 
     }
 );
+
+// Add the update method
+api.update = (url, data, config) => {
+    return api.patch(url, data, config);
+};
 
 export default api;
 

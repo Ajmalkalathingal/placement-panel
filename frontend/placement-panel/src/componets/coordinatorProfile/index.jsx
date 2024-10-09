@@ -90,7 +90,7 @@ const CoordinatorProfile = ({ profile }) => {
             {activeSection === 'orders' &&     <form>
         <legend>Student Registration</legend>
         <div className="mb-3">
-          <label htmlFor="disabledTextInput" className="form-label">Disabled input</label>
+          <label htmlFor="disabledTextInput" className="form-label">student id</label>
           <input type="text" id="disabledTextInput" className="form-control" placeholder="Disabled input" />
         </div>
         <div className="mb-3">

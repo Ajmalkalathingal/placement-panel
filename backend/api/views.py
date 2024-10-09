@@ -7,6 +7,7 @@ from rest_framework import generics
 from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
@@ -90,14 +91,9 @@ class RegisteredStudentDeleteView(generics.DestroyAPIView):
     queryset = StudentRegistration.objects.all()
     serializer_class = RegistredStudentSerializer
     permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]        
+ 
 
-
-class StudentListView(generics.ListAPIView):
-    queryset = StudentProfile.objects.all()  
-    serializer_class = StudentProfileSerializer
-    permission_classes = [IsAuthenticated]  
-
-        
+# student profile  
 class StudentProfileView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
 
@@ -112,32 +108,44 @@ class StudentProfileView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
+from .models import StudentProfile
+from .serializers import StudentProfileSerializer
+from .permissions import IsCoordinator, IsStudent
+
 class StudentProfileUpdateView(generics.UpdateAPIView):
     serializer_class = StudentProfileSerializer
     permission_classes = [IsAuthenticated, IsCoordinator | IsStudent]
+    parser_classes = [MultiPartParser, FormParser]  # To handle file uploads
+    lookup_field = 'student_id'
 
     def get_object(self, student_id=None):
-        
         if student_id:
             try:
                 return StudentProfile.objects.get(id=student_id)
             except StudentProfile.DoesNotExist:
                 raise NotFound("Student profile not found.")
-       
         return StudentProfile.objects.get(user=self.request.user)
 
     def update(self, request, *args, **kwargs):
-        student_id = kwargs.get('student_id') 
+        student_id = kwargs.get('student_id')
         student_profile = self.get_object(student_id=student_id)
         
         serializer = self.get_serializer(student_profile, data=request.data, partial=True)
-        
+
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
         
         return Response(serializer.errors, status=400)
-    
+
+
+
 
 class StudentProfileDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, IsCoordinator | IsStudent]
@@ -158,11 +166,13 @@ class StudentProfileDeleteView(generics.DestroyAPIView):
         student_profile.delete()
         return Response({"detail": "Student profile deleted successfully."}, status=204)        
 
+
+
 # Recruiter List View
 class RecruiterListView(generics.ListAPIView):
     queryset = RecruiterProfile.objects.all()  
     serializer_class = RecruiterProfileSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can view the list
+    permission_classes = [IsAuthenticated]  
 
 class RecruiterProfileView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
@@ -177,6 +187,7 @@ class RecruiterProfileView(APIView):
             return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
         
 # Recruiter Profile Update View
 class RecruiterProfileUpdateView(generics.UpdateAPIView):
@@ -270,3 +281,4 @@ class CordinatorProfileView(APIView):
             return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+           

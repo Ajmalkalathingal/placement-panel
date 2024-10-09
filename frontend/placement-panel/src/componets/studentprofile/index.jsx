@@ -2,10 +2,58 @@ import React, { useState } from 'react';
 import "./style.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faCalendar, faEdit } from '@fortawesome/free-solid-svg-icons';
+import api from '../../api';
+
 
 const StudentProfile = ({ profile }) => {
-  // State to manage which section is active
-  const [activeSection, setActiveSection] = useState('profile'); // Default to 'profile'
+  const [activeSection, setActiveSection] = useState('profile');
+    const [img, setProfileImage] = useState(null);
+    const [resume, setResume] = useState(null);
+    const [firstName, setFirstName] = useState(profile.user.first_name);
+    const [lastName, setLastName] = useState(profile.user.last_name);
+  
+    const handleProfileImageChange = (e) => {
+        setProfileImage(e.target.files[0]);  
+    };
+
+    const handleResumeChange = (e) => {
+        setResume(e.target.files[0]);  
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+  
+        const formData = new FormData();
+
+        if (img) {
+          formData.append("img", img);
+        }
+        if (resume) {
+          formData.append("resume", resume);;
+        }
+    
+        
+        formData.append("first_name", firstName);
+        formData.append("last_name", lastName);
+  
+        try {
+            const response = await api.update(`/api/student-profile/${profile.id}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+  
+            console.log('Profile updated successfully', response.data);
+        } catch (error) {
+            if (error.response) {
+                console.error('Error response data:', error.response.data);
+                console.error('Error response status:', error.response.status);
+                console.error('Error response headers:', error.response.headers);
+            } else {
+                console.error('Error message:', error.message);
+            }
+        }
+    };
 
   // Function to handle section change
   const handleSectionChange = (section) => {
@@ -19,7 +67,7 @@ const StudentProfile = ({ profile }) => {
           <div className="panel">
             <div className="user-heading round">
               <a href="#">
-                <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="" />
+              <img src={`${profile.image}` || "https://bootdey.com/img/Content/avatar/avatar3.png"} />
               </a>
               <h1>{profile.user.first_name} {profile.user.last_name}</h1>
               <p>{profile.user.email}</p>
@@ -69,8 +117,20 @@ const StudentProfile = ({ profile }) => {
                       <p><span>Email </span>: {profile.user.email}</p>
                     </div>
                     <div className="bio-row">
-                      <p><span>Registration </span>: {profile.registration}</p>
+                      <p><span>Registration </span>: {profile.registration.student_id}</p>
                     </div>
+                    <div className="bio-row">
+                    <p>
+                      <span>Registration:</span>
+                      {profile.resume ? (
+                        <a href={profile.resume} target="_blank" rel="noopener noreferrer">
+                          Download Resume
+                        </a>
+                      ) : (
+                        <span> No resume available</span>
+                      )}
+                    </p>
+                  </div>
                   </div>
                 </div>
 
@@ -130,39 +190,52 @@ const StudentProfile = ({ profile }) => {
 
             {/* Update Profile Section */}
             {activeSection === 'updateProfile' && (
-              <div>
-                <h2 className="post mt-2">Update Profile</h2>
-                <form>
-                  <div className="form-group">
-                    <label htmlFor="firstName">First Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="firstName"
-                      defaultValue={profile.user.first_name}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="lastName">Last Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="lastName"
-                      defaultValue={profile.user.last_name}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="email"
-                      defaultValue={profile.user.email}
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-primary">Update</button>
-                </form>
-              </div>
+              <div className='container'>
+              <h2 className="post mt-2">Edit Profile</h2>
+              <form className='mt-3' onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label htmlFor="profileImage">Profile Image</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    id="profileImage"
+                    onChange={handleProfileImageChange}
+                    accept="image/*"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="resume">Resume</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    id="resume"
+                    onChange={handleResumeChange}
+                    accept=".pdf,.doc,.docx"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="firstName">First Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="lastName">Last Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary">Update</button>
+              </form>
+            </div>
             )}
 
           </div>
@@ -173,3 +246,6 @@ const StudentProfile = ({ profile }) => {
 };
 
 export default StudentProfile;
+
+
+

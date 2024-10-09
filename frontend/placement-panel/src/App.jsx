@@ -10,6 +10,7 @@ import Login from './pages/login/login'
 
 import 'react-toastify/dist/ReactToastify.css';
 import Profile from './pages/profile/profile';
+import SignUpRicuter from './pages/signup/SignUpReicrutor';
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
         <Routes>
         <Route path="/" element={<Home/>} />
         <Route path="/signup-for-student" element={<Signup />} />
+        <Route path="/signup-for-ricruter" element={<SignUpRicuter />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
         </Routes>

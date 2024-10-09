@@ -158,7 +158,7 @@ class Job(models.Model):
         ]
 
     def __str__(self):
-        return self.title
+        return self.title   
 
 # Student Profile Model
 class StudentProfile(models.Model):
@@ -166,4 +166,4 @@ class StudentProfile(models.Model):
     registration = models.OneToOneField(StudentRegistration, on_delete=models.CASCADE, related_name='profile') 
     graduation_year = models.IntegerField(null=True, blank=True)
     resume = models.FileField(upload_to='resumes/', null=True, blank=True)
-    # jop_post = mod  ls.ForeignKey(Job, on_delete=models.CASCADE)
+    img = models.ImageField(upload_to='profile/', blank=True, null=True)

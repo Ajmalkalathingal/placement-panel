@@ -5,6 +5,7 @@ import api from "../../api";
 import { ACCESS_TOKEN,REFRESH_TOKEN } from "../../constant";
 import StudentProfile from "../../componets/studentprofile";
 import CoordinateorProfile from "../../componets/coordinatorProfile";
+import RicruterRegistrationForm from "../../componets/ricuterprofile/Rregistrationform";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -40,7 +41,7 @@ function Profile() {
                         navigate('/login'); // Redirect to login page
                     } else {
                         // Handle other errors based on status code or response data
-                        setError(err.response.data.error || 'Something went wrong');
+                        setError(err.response.data.error || 'Something went wrong please login again');
                     }
                 } else {
                     setError('Network error. Please try again later.');
@@ -80,8 +81,7 @@ console.log(profile)
 
             {userType === 'recruiter' && (
                 <>
-                    <p>Email: {profile.email}</p>
-                    <p>Company: {profile.company}</p>
+                    <RicruterRegistrationForm/>
                 </>
             )}
         </div>

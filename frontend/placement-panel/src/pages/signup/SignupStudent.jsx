@@ -30,9 +30,9 @@ function Signup() {
     setLoading(true);
 
     // Prepare the data to send
-    let coordinator_id = registrationId;
+    let student_id = registrationId;
     let data = {
-      coordinator_id,
+      student_id,
       email,
       password,
       first_name: name,
@@ -40,10 +40,10 @@ function Signup() {
       user_type: "student",
     };
 
-    console.log(data);
+    // console.log(data);
 
     try {
-      const response = await api.post("/api/signup/coordinator/", data);
+      const response = await api.post("/api/signup/student/", data);
 
       console.log(response.data);
       toast.success("Registration successful!");

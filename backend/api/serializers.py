@@ -107,13 +107,18 @@ class RegistredStudentSerializer(serializers.ModelSerializer):
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True) 
+    user = UserSerializer(read_only=True)
+    registration = RegistredStudentSerializer(read_only=True)
+
+    resume = serializers.FileField(required=False)
+    img = serializers.ImageField(required=False) 
+    
 
     class Meta:
         model = StudentProfile
-        fields = "__all__" 
-        read_only = True
-        read_only_fields = ['user']
+        fields = ['id','registration','user','img', 'resume','graduation_year'] 
+        read_only_fields = ['user', 'registration'] 
+
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True) 

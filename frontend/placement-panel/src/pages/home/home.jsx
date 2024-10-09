@@ -15,7 +15,7 @@ const Home = () => {
         <p class="lead">Quickly design and customize responsive mobile-first sites with Bootstrap, the world’s most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins.</p>
         <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
           <Link to={'/signup-for-student'} type="button" class="btn btn-primary btn-lg px-4 me-md-2 " fdprocessedid="wpmzpd">Student</Link>
-          <button type="button" class="btn btn-primary btn-lg px-4" fdprocessedid="m69i5w">Rricruter</button>
+          <Link to={'/signup-for-ricruter'} type="button" class="btn btn-primary btn-lg px-4" fdprocessedid="m69i5w">Rricruter</Link>
           <button type="button" class="btn btn-primary btn-lg px-4 me-md-2 " fdprocessedid="wpmzpd">coordinator</button>
           <button type="button" class="btn btn-primary btn-lg px-4" fdprocessedid="m69i5w">Verify</button>
         </div>
