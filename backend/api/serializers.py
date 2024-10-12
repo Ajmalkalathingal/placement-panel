@@ -70,10 +70,10 @@ class UserSerializer(serializers.ModelSerializer):
                 registration=coordinator_registration
             )
 
-        elif user.user_type == 'recruiter':
-            RecruiterProfile.objects.create(
-                user=user,
-            )
+        # elif user.user_type == 'recruiter':
+        #     RecruiterProfile.objects.create(
+        #         user=user,
+        #     )
         return user
     
 
@@ -105,6 +105,16 @@ class RegistredStudentSerializer(serializers.ModelSerializer):
         model = StudentRegistration
         fields = "__all__" 
 
+        def validate_student_id(self, value):
+            if StudentRegistration.objects.filter(student_id=value).exists():
+                raise serializers.ValidationError("This student ID is already registered.")
+            return value
+
+        def validate_email(self, value):
+            if StudentRegistration.objects.filter(email=value).exists():
+                raise serializers.ValidationError("This email is already registered.")
+            return value    
+
 
 class StudentProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -112,20 +122,24 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     resume = serializers.FileField(required=False)
     img = serializers.ImageField(required=False) 
-    
 
     class Meta:
         model = StudentProfile
         fields = ['id','registration','user','img', 'resume','graduation_year'] 
-        read_only_fields = ['user', 'registration'] 
-
+        read_only_fields = ['user', 'registration']        
+ 
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True) 
+
     class Meta:
         model = RecruiterProfile
-        fields = '__all__'        
+        fields = '__all__' 
         read_only_fields = ['user']
+
+        def create(self, validated_data):
+            return RecruiterProfile.objects.create(**validated_data)       
+     
 
 
 class CoordinatorProfileSerializer(serializers.ModelSerializer):

@@ -8,13 +8,14 @@ from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from django.http import Http404
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
         RecruiterProfileSerializer,
         CustomTokenObtainPairSerializer,
         JobSerializer,
-        RegistredStudentSerializer
+        RegistredStudentSerializer,
+        CoordinatorProfileSerializer
         )   
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
@@ -77,6 +78,38 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 # student registration
+class CourseChoicesView(APIView):
+    """
+    API view to return the list of available course choices
+    """
+    def get(self, request, *args, **kwargs):
+        choices = StudentRegistration.COURSE_CHOICES
+        course_choices = [] 
+
+        for choice in choices:
+            course_choices.append({
+                "value": choice[0],  
+                "label": choice[1]  
+            })
+        return Response(course_choices)
+    
+
+class RegisterStudentView(APIView):
+    """
+    API view to handle student registration
+    """
+
+    def post(self, request, *args, **kwargs):
+        serializer = RegistredStudentSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()  
+            return Response({
+                "message": "Student registered successfully",
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class RegistredStudentListView(generics.ListAPIView):
     queryset = StudentRegistration.objects.all()  
     serializer_class = RegistredStudentSerializer
@@ -87,11 +120,15 @@ class RegisteredStudentUpdateView(generics.UpdateAPIView):
     serializer_class = RegistredStudentSerializer
     permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]
 
+    def perform_update(self, serializer):
+        serializer.save()
+
 class RegisteredStudentDeleteView(generics.DestroyAPIView):
     queryset = StudentRegistration.objects.all()
     serializer_class = RegistredStudentSerializer
     permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]        
  
+
 
 # student profile  
 class StudentProfileView(APIView):
@@ -108,15 +145,6 @@ class StudentProfileView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
-from .models import StudentProfile
-from .serializers import StudentProfileSerializer
-from .permissions import IsCoordinator, IsStudent
 
 class StudentProfileUpdateView(generics.UpdateAPIView):
     serializer_class = StudentProfileSerializer
@@ -145,8 +173,6 @@ class StudentProfileUpdateView(generics.UpdateAPIView):
         return Response(serializer.errors, status=400)
 
 
-
-
 class StudentProfileDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, IsCoordinator | IsStudent]
 
@@ -168,28 +194,51 @@ class StudentProfileDeleteView(generics.DestroyAPIView):
 
 
 
-# Recruiter List View
-class RecruiterListView(generics.ListAPIView):
-    queryset = RecruiterProfile.objects.all()  
-    serializer_class = RecruiterProfileSerializer
-    permission_classes = [IsAuthenticated]  
+# Recruiter 
+
+class RecruterRegisterView(APIView):
+    """
+    API view to handle Recruiter registration and profile fetching
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = RecruiterProfile.objects.get(user=request.user)
+            serializer = RecruiterProfileSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except RecruiterProfile.DoesNotExist:
+            return Response({'detail': 'Recruiter profile does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        serializer = RecruiterProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user) 
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      
 
 class RecruiterProfileView(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request):
         try:
             user = request.user
-            student_profile = RecruiterProfile.objects.get(user=user)
-            serializer = RecruiterProfileSerializer(student_profile)
-            return Response(serializer.data)
-        except StudentProfile.DoesNotExist:
-            return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
+            recruiter_profile = RecruiterProfile.objects.get(user=user)
+            serializer = RecruiterProfileSerializer(recruiter_profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except RecruiterProfile.DoesNotExist: 
+            return Response({"error": "Recruiter profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     
-        
-# Recruiter Profile Update View
+class RecruiterListView(generics.ListAPIView):
+    queryset = RecruiterProfile.objects.all()  
+    serializer_class = RecruiterProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+
 class RecruiterProfileUpdateView(generics.UpdateAPIView):
     serializer_class = RecruiterProfileSerializer
     permission_classes = [IsAuthenticated, IsRecruiter | IsCoordinator|IsStudent]
@@ -274,10 +323,10 @@ class CordinatorProfileView(APIView):
     def get(self, request):
         try:
             user = request.user
-            student_profile = CoordinatorProfile.objects.get(user=user)
-            serializer = StudentProfileSerializer(student_profile)
+            coordinator_profile = CoordinatorProfile.objects.get(user=user)
+            serializer = CoordinatorProfileSerializer(coordinator_profile)
             return Response(serializer.data)
-        except StudentProfile.DoesNotExist:
+        except CoordinatorProfile.DoesNotExist:
             return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

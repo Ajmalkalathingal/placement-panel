@@ -10,10 +10,15 @@ import RicruterRegistrationForm from "../../componets/ricuterprofile/Rregistrati
 function Profile() {
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState(null);
+    const [isRecruiter, setIsRecruiter] = useState(false);  // New state to check if recruiter profile exists
     const navigate = useNavigate();
     const userType = localStorage.getItem('userType'); 
 
     useEffect(() => {
+        if (!userType){
+            return navigate('/login');
+        }
+
         const fetchProfile = async () => {
             try {
                 let profileUrl;
@@ -23,25 +28,25 @@ function Profile() {
                 } else if (userType === 'coordinator') {
                     profileUrl = '/api/coordinators/profile/';
                 } else if (userType === 'recruiter') {
-                    profileUrl = '/api/recruiters/profile/';
+                    profileUrl = '/api/recruiters/profile/';  // Changed to check if recruiter profile exists
                 }
 
                 const response = await api.get(profileUrl);
                 setProfile(response.data);
             } catch (err) {
-                console.error('Error fetching profile:', err); // Log the full error for debugging
+                console.error('Error fetching profile:', err);
 
-                // Handle the error by checking if it's a token expiration issue
                 if (err.response) {
                     if (err.response.status === 401) {
-                        // If token expired, navigate to login page
                         toast.error("Session expired. Please log in again.");
                         localStorage.removeItem(ACCESS_TOKEN);
                         localStorage.removeItem(REFRESH_TOKEN);
-                        navigate('/login'); // Redirect to login page
+                        navigate('/login');
+                    } else if (userType === 'recruiter' && err.response.status === 404) {
+                        // If recruiter profile does not exist (404), show registration form
+                        setIsRecruiter(true);
                     } else {
-                        // Handle other errors based on status code or response data
-                        setError(err.response.data.error || 'Something went wrong please login again');
+                        setError(err.response.data.error || 'Something went wrong, please try again.');
                     }
                 } else {
                     setError('Network error. Please try again later.');
@@ -50,38 +55,50 @@ function Profile() {
         };
 
         fetchProfile();
-    }, [userType, navigate]); // Include navigate in the dependency array
+    }, [userType, navigate]);
+
+    // Handle recruiter registration form submission
+    const handleRecruiterRegistration = async (formData) => {
+        try {
+            const response = await api.post('/api/recruiter/register/', formData);
+            setProfile(response.data);
+            setIsRecruiter(false);
+            toast.success("Recruiter profile created successfully.");
+        } catch (err) {
+            console.error('Error registering recruiter:', err);
+            toast.error("Failed to register recruiter. Please try again.");
+        }
+    };
 
     if (error) {
         return <div>Error: {error}</div>;
     }
 
-    if (!profile) {
+    if (!profile && !isRecruiter) {
         return <div>Loading...</div>;
     }
-console.log(profile)
+    console.log(profile)
     return (
         <div>
-            {/* <h1>Welcome {profile.user.first_name}</h1>
-            <p>Profile Type: {userType}</p> */}
-
             {userType === 'student' && (
-                <>
-                    {/* <p>Email: {profile.email}</p>
-                    <p>Graduation Year: {profile.graduation_year}</p> */}
-                    <StudentProfile profile={profile} />
-                </>
+                <StudentProfile profile={profile} />
             )}
 
             {userType === 'coordinator' && (
-                <>
-                    <CoordinateorProfile/>
-                </>
+                <CoordinateorProfile profile={profile} />
             )}
 
             {userType === 'recruiter' && (
                 <>
-                    <RicruterRegistrationForm/>
+                    {isRecruiter ? (
+                        <RicruterRegistrationForm onSubmit={handleRecruiterRegistration} />
+                    ) : (
+                        <div>
+                            {/* Display recruiter profile once it's created */}
+                            <h1>Welcome, Recruiter {profile.user.first_name}</h1>
+                            <p>Email: {profile.user.email}</p>
+                        </div>
+                    )}
                 </>
             )}
         </div>

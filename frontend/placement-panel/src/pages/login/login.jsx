@@ -29,9 +29,8 @@ function Login() {
 
     try {
       const tokenResponse = await api.post("/api/token/", data);
-      console.log(tokenResponse)
+      
       if (tokenResponse.data) {
-
         localStorage.setItem(ACCESS_TOKEN, tokenResponse.data.access);
         localStorage.setItem(REFRESH_TOKEN, tokenResponse.data.refresh);
         localStorage.setItem('userType', tokenResponse.data.user_type);

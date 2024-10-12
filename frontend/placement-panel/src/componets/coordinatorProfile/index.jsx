@@ -5,7 +5,8 @@ import {
   faUser, faHome, faTachometerAlt, faTable, faBox, faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import CDHome from './CDhome';
-import CDList from './CDList';
+import StuList from './StuList';
+import Registration from './registration';
 
 const CoordinatorProfile = ({ profile }) => {
   const [activeSection, setActiveSection] = useState('home'); // Default to 'home'
@@ -18,7 +19,7 @@ const CoordinatorProfile = ({ profile }) => {
     <div className="container-fluid">
       <div className="row">
         {/* Sidebar */}
-        <div className="col-md-3 bg-body-tertiary p-3" style={{ height: '100vh', width:'33vh' }}>
+        <div className="col-lg-3 col-md-4 col-sm-12 bg-body-tertiary p-3 sidebar" >
           <a href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
             <FontAwesomeIcon icon={faUser} className="me-2" />
             <span className="fs-4">Coordinator</span>
@@ -38,9 +39,9 @@ const CoordinatorProfile = ({ profile }) => {
               </a>
             </li>
             <li>
-              <a href="#" className={`nav-link ${activeSection === 'orders' ? 'active' : ''}`} onClick={() => handleSectionChange('orders')}>
+              <a href="#" className={`nav-link ${activeSection === 'registration' ? 'active' : ''}`} onClick={() => handleSectionChange('registration')}>
                 <FontAwesomeIcon icon={faTable} className="me-2" />
-                Orders
+                registration
               </a>
             </li>
             <li>
@@ -84,31 +85,12 @@ const CoordinatorProfile = ({ profile }) => {
         </div>
 
         {/* Main Content */}
-        <div className="col-md-9 p-4">
-            {activeSection === 'home' && <CDHome/>}
-            {activeSection === 'dashboard' && <CDList/>}
-            {activeSection === 'orders' &&     <form>
-        <legend>Student Registration</legend>
-        <div className="mb-3">
-          <label htmlFor="disabledTextInput" className="form-label">student id</label>
-          <input type="text" id="disabledTextInput" className="form-control" placeholder="Disabled input" />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="disabledTextInput" className="form-label">Disabled input</label>
-          <input type="text" id="disabledTextInput" className="form-control" placeholder="Disabled input" />
-        </div>
-        <div className="mb-3">
-          <div className="form-check">
-            <input className="form-check-input" type="checkbox" id="disabledFieldsetCheck"  />
-            <label className="form-check-label" htmlFor="disabledFieldsetCheck">
-              Can't check this
-            </label>
-          </div>
-        </div>
-        <button type="submit" className="btn btn-primary">Submit</button>
-    </form>}
-            {activeSection === 'products' && <h1>Products Section</h1>}
-            {activeSection === 'customers' && <h1>Customers Section</h1>}
+        <div className="col-lg-9 col-md-8 col-sm-12 p-4 content">
+          {activeSection === 'home' && <CDHome />}
+          {activeSection === 'dashboard' && <StuList />}
+          {activeSection === 'registration' && <Registration/>}
+          {activeSection === 'products' && <h1>Products Section</h1>}
+          {activeSection === 'customers' && <h1>Customers Section</h1>}
         </div>
       </div>
     </div>

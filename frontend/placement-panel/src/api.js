@@ -71,6 +71,9 @@ api.interceptors.response.use(
 api.update = (url, data, config) => {
     return api.patch(url, data, config);
 };
+api.put = (url, data, config) => {
+    return api.patch(url, data, config);
+};
 
 export default api;
 
