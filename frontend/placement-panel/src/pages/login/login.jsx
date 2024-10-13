@@ -57,7 +57,7 @@ function Login() {
   return (
     <div className="wrapper">
       <div className="signup-wrapper">
-        <h2 className="title">Login on <span style={{ color: "#2970ff" }}>Student</span></h2>
+        <h2 className="title">Login <span style={{ color: "#2970ff" }}></span></h2>
         <form>
           <Input label="Email" type="email" state={email} setState={setEmail} placeholder="Enter your email" />
           <Input label="Password" type="password" state={password} setState={setPassword} placeholder="Enter password" />

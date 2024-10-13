@@ -8,13 +8,13 @@ const Nav = () => {
         >
           {/* University Image */}
           <img
-            src="https://upload.wikimedia.org/wikipedia/en/3/39/Uni_of_cali.png"
+            src={'src/assets/images/logo2.png'}
             alt="University Logo"
             width="40"
             height="40"
             className="me-2"
           />
-          <span className="fs-4">Calicut Univercity</span>
+          <span className="fs-4">Placement Cell DCMS</span> 
         </a>
 
         <ul className="nav nav-pills">
