@@ -6,6 +6,7 @@ import { ACCESS_TOKEN,REFRESH_TOKEN } from "../../constant";
 import StudentProfile from "../../componets/studentprofile";
 import CoordinateorProfile from "../../componets/coordinatorProfile";
 import RicruterRegistrationForm from "../../componets/ricuterprofile/Rregistrationform";
+import RecruterProfile from "../../componets/ricuterprofile";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -28,7 +29,7 @@ function Profile() {
                 } else if (userType === 'coordinator') {
                     profileUrl = '/api/coordinators/profile/';
                 } else if (userType === 'recruiter') {
-                    profileUrl = '/api/recruiters/profile/';  // Changed to check if recruiter profile exists
+                    profileUrl = '/api/recruiters/profile/';
                 }
 
                 const response = await api.get(profileUrl);
@@ -77,7 +78,7 @@ function Profile() {
     if (!profile && !isRecruiter) {
         return <div>Loading...</div>;
     }
-    console.log(profile)
+    console.log(profile,"ggg")
     return (
         <div>
             {userType === 'student' && (
@@ -94,9 +95,7 @@ function Profile() {
                         <RicruterRegistrationForm onSubmit={handleRecruiterRegistration} />
                     ) : (
                         <div>
-                            {/* Display recruiter profile once it's created */}
-                            <h1>Welcome, Recruiter {profile.user.first_name}</h1>
-                            <p>Email: {profile.user.email}</p>
+                           <RecruterProfile profile={profile}/>
                         </div>
                     )}
                 </>

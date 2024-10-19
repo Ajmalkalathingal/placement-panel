@@ -15,7 +15,12 @@ from .views import (
     RecruiterProfileView,
     RecruiterProfileUpdateView,
     RecruiterProfileDeleteView,
+
+
     JobCreateView,
+    JobListView,
+    JobUpdateView,
+    JobDeleteView,
 
     CourseChoicesView,
     RegisterStudentView,
@@ -48,9 +53,15 @@ urlpatterns = [
     path('recruiters/profile/', RecruiterProfileView.as_view(), name='recruiter-profile'),
     path('recruiters/', RecruiterListView.as_view(), name='recruiter-list'),
     path('recruiters/<int:recruiter_id>/update/', RecruiterProfileUpdateView.as_view(), name='recruiter-update'),
-    path('recruiters/update/', RecruiterProfileUpdateView.as_view(), name='recruiter-update'),
+    # path('recruiters/update/', RecruiterProfileUpdateView.as_view(), name='recruiter-update'),
     path('recruiters/<int:recruiter_id>/delete/', RecruiterProfileDeleteView.as_view(), name='recruiter-delete'),
+
+    # job
     path('recruiters/create-job-post/', JobCreateView.as_view(), name='recruiter-delete'),
+     path('jobs/', JobListView.as_view(), name='job-list'),
+    path('jobs/<int:pk>/update/', JobUpdateView.as_view(), name='job-update'),
+    path('jobs/<int:pk>/delete/', JobDeleteView.as_view(), name='job-delete'),
+
 
     # registration
     path('course-choices/', CourseChoicesView.as_view(), name='course-choices'),

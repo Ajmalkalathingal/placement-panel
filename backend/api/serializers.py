@@ -127,20 +127,42 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         model = StudentProfile
         fields = ['id','registration','user','img', 'resume','graduation_year'] 
         read_only_fields = ['user', 'registration']        
- 
-
+   
+     
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True) 
+    company_logo = serializers.ImageField(required=False)
 
     class Meta:
         model = RecruiterProfile
-        fields = '__all__' 
-        read_only_fields = ['user']
+        fields = ['id', 'company_name', 'position', 'contact_number', 'company_logo','user']
 
-        def create(self, validated_data):
-            return RecruiterProfile.objects.create(**validated_data)       
-     
+    def create(self, validated_data):
+        # The user is already set in the context
+        user = self.context['request'].user
+        recruiter_profile = RecruiterProfile.objects.create(user=user, **validated_data)
+        return recruiter_profile
 
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+
+        # Update the RecruiterProfile fields
+        instance.company_name = validated_data.get('company_name', instance.company_name)
+        instance.position = validated_data.get('position', instance.position)
+        instance.contact_number = validated_data.get('contact_number', instance.contact_number)
+
+        if 'company_logo' in validated_data:
+            instance.company_logo = validated_data.get('company_logo', instance.company_logo)
+        instance.save()
+        
+        if user_data:
+            user = instance.user 
+            user.first_name = user_data.get('first_name', user.first_name)
+            user.last_name = user_data.get('last_name', user.last_name)
+            user.email = user_data.get('email', user.email)
+
+            instance.save()
+        return instance
 
 class CoordinatorProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True) 
@@ -152,8 +174,16 @@ class CoordinatorProfileSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
-    user = RecruiterProfileSerializer(read_only=True) 
     class Meta:
         model = Job
         fields = '__all__'        
-        read_only_fields = ['user']
+        read_only_fields = ['recruiter']
+
+    def create(self, validated_data):
+        # The user is already set in the context
+        recruiter = self.context['request'].user.recruiterprofile
+        if 'recruiter' in validated_data:
+            validated_data.pop('recruiter')
+        
+        job = Job.objects.create(recruiter=recruiter, **validated_data)
+        return job

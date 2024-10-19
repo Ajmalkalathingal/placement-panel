@@ -100,13 +100,18 @@ class CoordinatorRegistration(models.Model):
     )
 
     def __str__(self):
-        if self.user:  # Check if user is not None
+        if self.user:  
             return f'{self.user.first_name} {self.user.last_name} - {self.email} - Registered: {self.is_registered}'
         return f'{self.coordinator_id} - {self.email} - Registered: {self.is_registered}'
 
 
-    # def __str__(self):
-    #     return f'{self.user.first_name} {self.user.last_name}'
+# Student Profile Model
+class StudentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'student'})
+    registration = models.OneToOneField(StudentRegistration, on_delete=models.CASCADE, related_name='profile') 
+    graduation_year = models.IntegerField(null=True, blank=True)
+    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
+    img = models.ImageField(upload_to='profile/', blank=True, null=True)    
 
 # CoordinatorProfile model 
 class CoordinatorProfile(models.Model):
@@ -160,10 +165,4 @@ class Job(models.Model):
     def __str__(self):
         return self.title   
 
-# Student Profile Model
-class StudentProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'student'})
-    registration = models.OneToOneField(StudentRegistration, on_delete=models.CASCADE, related_name='profile') 
-    graduation_year = models.IntegerField(null=True, blank=True)
-    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
-    img = models.ImageField(upload_to='profile/', blank=True, null=True)
+

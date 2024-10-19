@@ -30,7 +30,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -146,8 +145,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-# CELERY_BROKER_URL = 'redis://redis:6379/0'
-# CELERY_BACKEND = 'redis://redis:6379/0'
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://redis:6379/0'
@@ -162,10 +159,6 @@ CELERY_BEAT_SCHEDULE = {
     'update-product-prices-daily': {
         'task': 'project.tasks.send_job_post_email_to_students',
         'schedule': crontab(hour=0, minute=0),  
-    },
-    'delete-expired-job-posts-every-day': {
-        'task': 'api.tasks.delete_expired_job_posts',
-        'schedule': crontab(hour=0, minute=0), 
     },
 }
 
@@ -206,3 +199,9 @@ AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "https://your-frontend-domain.com",
+#     "http://localhost:3000",  
+# ]
+

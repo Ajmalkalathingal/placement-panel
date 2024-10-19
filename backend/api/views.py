@@ -1,7 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import serializers
 from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
@@ -195,10 +194,14 @@ class StudentProfileDeleteView(generics.DestroyAPIView):
 
 
 # Recruiter 
+class RecruiterListView(generics.ListAPIView):
+    queryset = RecruiterProfile.objects.all()  
+    serializer_class = RecruiterProfileSerializer
+    permission_classes = [IsAuthenticated]
 
 class RecruterRegisterView(APIView):
     """
-    API view to handle Recruiter registration and profile fetching
+    API view to handle Recruiter profile creation and fetching
     """
     permission_classes = [IsAuthenticated]
 
@@ -211,11 +214,17 @@ class RecruterRegisterView(APIView):
             return Response({'detail': 'Recruiter profile does not exist.'}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
-        serializer = RecruiterProfileSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user) 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Check if the user already has a profile
+            recruiter_profile = RecruiterProfile.objects.get(user=request.user)
+            return Response({'detail': 'Recruiter profile already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        except RecruiterProfile.DoesNotExist:
+            # Create a new profile if it doesn't exist
+            serializer = RecruiterProfileSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()  # Save the profile
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
       
 
 class RecruiterProfileView(APIView):
@@ -232,12 +241,6 @@ class RecruiterProfileView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    
-class RecruiterListView(generics.ListAPIView):
-    queryset = RecruiterProfile.objects.all()  
-    serializer_class = RecruiterProfileSerializer
-    permission_classes = [IsAuthenticated]
-
 
 class RecruiterProfileUpdateView(generics.UpdateAPIView):
     serializer_class = RecruiterProfileSerializer
@@ -247,14 +250,14 @@ class RecruiterProfileUpdateView(generics.UpdateAPIView):
         # If recruiter_id is passed, fetch the profile based on ID
         if recruiter_id:
             try:
-                return RecruiterProfile.objects.get(id=recruiter_id)
+                return RecruiterProfile.objects.get(user=self.request.user)
             except RecruiterProfile.DoesNotExist:
                 raise NotFound("Recruiter profile not found.")
 
         return RecruiterProfile.objects.get(user=self.request.user)
 
     def update(self, request, *args, **kwargs):
-        recruiter_id = kwargs.get('recruiter_id')  # Get recruiter ID from URL if provided
+        recruiter_id = kwargs.get('recruiter_id') 
         recruiter_profile = self.get_object(recruiter_id=recruiter_id)
         
         serializer = self.get_serializer(recruiter_profile, data=request.data, partial=True)
@@ -286,15 +289,16 @@ class RecruiterProfileDeleteView(generics.DestroyAPIView):
         return Response({"detail": "Recruiter profile deleted successfully."}, status=204)    
 
 
-from .tasks import send_job_post_email_to_students
+from api.tasks import send_job_post_email_to_students
 class JobCreateView(generics.CreateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer 
+    permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        self.send_email_to_students(response.data)
-        return response
+    def perform_create(self, serializer):
+        serializer.save(recruiter=self.request.user.recruiterprofile)
+        # self.send_email_to_students(job)
+
 
     def send_email_to_students(self, job_data):
         # Get the recruiter object using the recruiter ID
@@ -317,6 +321,28 @@ class JobCreateView(generics.CreateAPIView):
         # Send the email using an asynchronous task (using Celery)
         send_job_post_email_to_students.delay(subject, message, list(student_emails))
 
+class JobListView(generics.ListAPIView):
+    serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Job.objects.filter(recruiter__user=self.request.user)
+    
+class JobUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Job.objects.filter(recruiter__user=self.request.user)
+    
+class JobDeleteView(generics.DestroyAPIView):
+    queryset = Job.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Job.objects.filter(recruiter__user=self.request.user)
+
 
 class CordinatorProfileView(APIView):
     permission_classes = [IsAuthenticated] 
@@ -330,4 +356,5 @@ class CordinatorProfileView(APIView):
             return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-           
+
+

@@ -2,8 +2,7 @@
 from celery import shared_task
 from django.core.mail import send_mail
 from django.utils import timezone
-from .models import Job
-
+from .models import Job,RecruiterProfile, User
 
 @shared_task
 def send_job_post_email_to_students(subject, message, recipient_list):
@@ -17,8 +16,25 @@ def send_job_post_email_to_students(subject, message, recipient_list):
 
 
 @shared_task
-def delete_expired_job_posts():
-    now = timezone.now()
-    expired_jobs = Job.objects.filter(expiry_date__lt=now)
-    count, _ = expired_jobs.delete()
-    return f"{count} expired job posts were deleted"
+def send_verification_email(recruiter_id):
+    try:
+        recruiter = RecruiterProfile.objects.get(id=recruiter_id)
+        verifiers = User.objects.filter(user_type='verifier').values_list('email', flat=True)
+
+        if verifiers:
+            send_mail(
+                'New Recruiter Registered',
+                f'A new recruiter, {recruiter.user.first_name} {recruiter.user.last_name}, from {recruiter.company_name} has registered. Please verify their details.',
+                'from@example.com',
+                verifiers,
+                fail_silently=False,
+            )
+
+    except RecruiterProfile.DoesNotExist:
+        print(f"Recruiter with id {recruiter_id} not found.")
+ 
+@shared_task
+def my_task(arg1, arg2):
+    # Example task implementation
+    result = arg1 + arg2  # Replace this with your desired operation
+    return result

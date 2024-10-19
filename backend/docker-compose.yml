@@ -12,9 +12,6 @@ services:
       - "8000:8000"
     depends_on:
       - redis
-      - celery
-    dns:
-      - 8.8.8.8  # Add Google's public DNS
 
   redis:
     container_name: redis
@@ -22,11 +19,9 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
-    dns:
-      - 8.8.8.8  
 
   celery:
-    restart: always
+    container_name: celery-worker
     build:
       context: .
     command: celery -A project worker --loglevel=info
@@ -38,10 +33,9 @@ services:
       - redis
     volumes:
       - .:/usr/src/app/
-    dns:
-      - 8.8.8.8
 
   celery-beat:
+    container_name: celery-beat
     build:
       context: .
     command: celery -A project beat --loglevel=info
@@ -52,5 +46,3 @@ services:
       - redis
     volumes:
       - .:/usr/src/app/
-    dns:
-      - 8.8.8.8      

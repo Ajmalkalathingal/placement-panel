@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
+import './style.css';
 import "bootstrap/dist/css/bootstrap.min.css";
-import api from "../../api";
 
 function RicruterRegistrationForm({onSubmit}) {
   const [formData, setFormData] = useState({
@@ -37,104 +36,104 @@ function RicruterRegistrationForm({onSubmit}) {
     await onSubmit(form);
 
     // Reset form fields after successful submission
-    setFormData({
-      company_name: "",
-      position: "",
-      contact_number: "",
-      company_logo: null,
-    });
+    // setFormData({
+    //   company_name: "",
+    //   position: "",
+    //   contact_number: "",
+    //   company_logo: null,
+    // });
     setLoading(false);
   };
 
   return (
-    <div className="container mt-5">
-<div className="row">
-    <div className="col-md-4">
-    <div class="card text-white bg-primary py-5 d-md-down-none" style={{width:"100%", height:"100%"}}>
-<div class="card-body text-center">
-<div>
-<h2>Sign up</h2>
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-<button type="button" class="btn btn-primary active mt-3">Register Now!</button>
-</div>
-</div>
-</div>
-    </div>
-        <div className="col-md-8">
-          <h2>Create Recruiter Profile</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="company_name" className="form-label">
-                Company Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="company_name"
-                name="company_name"
-                value={formData.company_name}
-                onChange={handleChange}
-                placeholder="Enter company name"
-                required
-              />
+    <div className="container register">
+    <div className="row">
+      <div className="col-md-3 register-left">
+        <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt=""/>
+        <h3>Welcome</h3>
+        <p>You are 30 seconds away from earning your own money!</p>
+        <input type="submit" name="" value="Login"/><br/>
+      </div>
+      <div className="col-md-9 register-right">
+        <ul className="nav nav-tabs nav-justified" id="myTab" role="tablist">
+          <li className="nav-item">
+            <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Hirer</a>
+          </li>
+        </ul>
+        <div className="tab-content" id="myTabContent ">
+          {/* Employee Form */}
+          <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <h3 className="register-heading">Apply as an Employee</h3>
+            <div className="row register-form">
+              <div className="col-md-6">
+                
+                <div className="form-group">
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="company name *" 
+                    name="company_name"
+                    value={formData.company_name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="company position *" 
+                    name="position"
+                    value={formData.position}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <input 
+                    type="text" 
+                    minLength="10" 
+                    maxLength="10" 
+                    className="form-control" 
+                    placeholder="Your Phone *" 
+                    name="contact_number"
+                    value={formData.contact_number}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="company_logo">Upload Company Logo:</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="company_logo"
+                      name="company_logo"
+                      onChange={handleChange}
+                    />
+                  </div>
+                <input 
+                  type="submit" 
+                  className="btnRegister"  
+                  value={loading ? "Registering..." : "Register"} 
+                  disabled={loading}
+                  onClick={handleSubmit}
+                />
+              </div>
             </div>
+          </div>
 
-            <div className="mb-3">
-              <label htmlFor="position" className="form-label">
-                Position
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="position"
-                name="position"
-                value={formData.position}
-                onChange={handleChange}
-                placeholder="Enter position"
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="contact_number" className="form-label">
-                Contact Number
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="contact_number"
-                name="contact_number"
-                value={formData.contact_number}
-                onChange={handleChange}
-                placeholder="Enter contact number"
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="company_logo" className="form-label">
-                Company Logo
-              </label>
-              <input
-                type="file"
-                className="form-control"
-                id="company_logo"
-                name="company_logo"
-                onChange={handleChange}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create Profile"}
-            </button>
-          </form>
+          {/* Hirer Form */}
+          <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <h3 className="register-heading">Apply as a Ricruter</h3>
+            {/* Add hirer form fields similar to the employee */}
+          </div>
         </div>
       </div>
     </div>
+  </div>
   );
 }
 
