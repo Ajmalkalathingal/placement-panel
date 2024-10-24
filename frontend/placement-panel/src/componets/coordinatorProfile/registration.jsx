@@ -6,6 +6,7 @@ import { faUser, faBook, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 const Registration = ({}) => {
   const [courses, setCourses] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const [formData, setFormData] = useState({
     student_id: '',
@@ -40,7 +41,6 @@ const Registration = ({}) => {
     });
   };
 
-console.log(formData)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -49,7 +49,6 @@ console.log(formData)
     try {
  
       const response = await api.post("api/register/", formData);
-      console.log(response); 
       setSuccess('Registration successful!'); 
     } catch (error) {
       console.error("Error during registration:", error);
@@ -61,6 +60,38 @@ console.log(formData)
     return <div>Loading...</div>; 
   }
 
+
+
+  const handleFileChange = (e) => {
+      setSelectedFile(e.target.files[0]);
+  };
+
+  const handleSubmitPdf = async (e) => {
+      e.preventDefault();
+
+      if (!selectedFile) {
+          alert("Please select a file.");
+          return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      try {
+          const response = await api.post('/api/upload-student-data/', formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data'
+              }
+          });
+
+          if (response.status === 200) {
+              alert('File uploaded successfully!');
+          }
+      } catch (error) {
+          console.error('Error uploading file:', error);
+          alert('Failed to upload file.');
+      }
+  };
   return (
     <>
       <div className="card text-black" style={{ borderRadius: "25px" }}>
@@ -168,6 +199,13 @@ console.log(formData)
           </div>
         </div>
       </div>
+      <div>
+            <h2>Upload Student Data</h2>
+            <form onSubmit={handleSubmitPdf}>
+                <input type="file" accept=".xlsx" onChange={handleFileChange} />
+                <button type="submit">Upload</button>
+            </form>
+        </div>
     </>
   );
 };

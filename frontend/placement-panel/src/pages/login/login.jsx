@@ -7,6 +7,10 @@ import { Link, useNavigate, Navigate } from "react-router-dom";
 import api from "../../api";
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../../constant";
 
+import Cookies from 'js-cookie';
+import { setTokenCookies } from "../../utils/cookies";
+
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,44 +19,46 @@ function Login() {
 
     // Check if user is already logged in
     useEffect(() => {
-      const accessToken = localStorage.getItem(ACCESS_TOKEN);
+      const accessToken = Cookies.get(ACCESS_TOKEN);
       if (accessToken) {
         navigate("/profile");  // Redirect to profile if access token exists
       }
     }, [navigate]);
 
-  const studentLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    const studentLogin = async (e) => {
+      // e.preventDefault();
+      setLoading(true);
+    
+    
+      // Prepare login data
+      const data = {
+        email: email,     
+        password: password
+      };
+      console.log(data)
+    
+      try {
+        const tokenResponse = await api.post("/api/token/", data);
+        const  access= tokenResponse.data.access_token;
+        const  refresh= tokenResponse.data.refresh_token;
+        const  user_type= tokenResponse.data.user_type;
 
-    let data = { email, password };
-
-    try {
-      const tokenResponse = await api.post("/api/token/", data);
-      
-      if (tokenResponse.data) {
-        localStorage.setItem(ACCESS_TOKEN, tokenResponse.data.access);
-        localStorage.setItem(REFRESH_TOKEN, tokenResponse.data.refresh);
-        localStorage.setItem('userType', tokenResponse.data.user_type);
-        localStorage.setItem('username', tokenResponse.data.username);
-
+        // Save tokens in cookies
+        setTokenCookies(access, refresh,user_type);
+    
         toast.success("Login successful!");
-
         navigate(`/profile`);
-      } else {
-        toast.error("Login failed. Please try again.");
-        navigate(`/login`);
+      } catch (error) {
+        console.log(error)
+        if (error.response) {
+          toast.error("Login failed: " + error.response.data.detail);
+        } else {
+          toast.error("Network error. Please try again later.");
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      if (error.response) {
-        toast.error("Login failed: " + error.response.data.detail);
-      } else {
-        toast.error("Network error. Please try again later.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   return (
     <div className="wrapper">

@@ -3,6 +3,7 @@ from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import JsonResponse
 
 
 # user creation and authentication serializers
@@ -80,7 +81,6 @@ class UserSerializer(serializers.ModelSerializer):
 class CustomTokenObtainPairSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
     password = serializers.CharField(write_only=True)
-    user = UserSerializer(read_only=True)
     
     def validate(self, attrs):
         email = attrs.get('email')
@@ -90,14 +90,16 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError('Invalid credentials')
 
+        # Generate tokens
         refresh = RefreshToken.for_user(user)
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user_type': user.user_type,
-            'user' : user.first_name
-        }
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
 
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user_type': user.user_type,
+        }
     # -------------------------------------------------------------------------------------------------#
 class RegistredStudentSerializer(serializers.ModelSerializer):
     
@@ -117,16 +119,33 @@ class RegistredStudentSerializer(serializers.ModelSerializer):
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    registration = RegistredStudentSerializer(read_only=True)
+    user = UserSerializer(read_only=True) 
+    registration = RegistredStudentSerializer(read_only=True) 
 
     resume = serializers.FileField(required=False)
-    img = serializers.ImageField(required=False) 
+    img = serializers.ImageField(required=False)
 
     class Meta:
         model = StudentProfile
-        fields = ['id','registration','user','img', 'resume','graduation_year'] 
-        read_only_fields = ['user', 'registration']        
+        fields = ['id', 'registration', 'user', 'img', 'resume', 'graduation_year']
+        read_only_fields = ['registration', 'user']  
+
+    def update(self, instance, validated_data):
+        # Extract user first_name and last_name from validated_data
+        first_name = self.context['request'].data.get('user.first_name', None)
+        last_name = self.context['request'].data.get('user.last_name', None)
+
+        if first_name or last_name:
+            user = instance.user
+            if first_name:
+                user.first_name = first_name
+            if last_name:
+                user.last_name = last_name
+            user.save()
+
+        # Update other fields in the instance
+        return super().update(instance, validated_data)
+        
    
      
 class RecruiterProfileSerializer(serializers.ModelSerializer):
@@ -174,6 +193,7 @@ class CoordinatorProfileSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    recruiter = RecruiterProfileSerializer(read_only=True)
     class Meta:
         model = Job
         fields = '__all__'        

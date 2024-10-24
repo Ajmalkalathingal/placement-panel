@@ -44,8 +44,8 @@ const CreateJobPost = (profile) => {
         }
     };
     return <>
-                <div className="container register-form mt-5">
-                <div className="form">
+                <div className="container register-form ">
+                <div className="form card">
                     <div className="form-content">
                         <p className="text-center heading">Create Job Post</p>
                         <form onSubmit={handleSubmit}>

@@ -1,16 +1,20 @@
 import axios from "axios"
 import { ACCESS_TOKEN,REFRESH_TOKEN } from "./constant"
 import { toast } from "react-toastify";
+import Cookies from 'js-cookie';
+
+
 
 // Create an instance of axios
 const api = axios.create({
     baseURL: 'http://localhost:8000', 
-});
+})
+
 
 // Request interceptor to add the access token to headers
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem(ACCESS_TOKEN);
+        const token = Cookies.get(ACCESS_TOKEN);
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -21,51 +25,43 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor to handle expired tokens
+
+
+// Add a response interceptor
 api.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // Check if the error status is 401 (Unauthorized)
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;  // Mark the request as retrying
+        // If the error status is 401 and there is no originalRequest._retry flag,
+        // it means the token has expired and we need to refresh it
+        if (error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
 
-            const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-            if (refreshToken) {
-                try {
-                    const tokenResponse = await axios.post('http://localhost:8000/api/token/refresh/', {
-                        refresh: refreshToken,
-                    });
+            try {
+                const refreshToken = Cookies.get(REFRESH_TOKEN); // Get the refresh token here
+                const response = await axios.post('http://127.0.0.1:8000/api/token/refresh/', { refresh: refreshToken }); // Correct endpoint and payload
 
-                    const newAccessToken = tokenResponse.data.access;
-                    localStorage.setItem(ACCESS_TOKEN, newAccessToken); 
+                const newAccessToken = response.data.access; // Access the new token
+                console.log(newAccessToken, 'my new token');
 
-                    // Update the Authorization header and retry the original request
-                    originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                    return api(originalRequest);  // Retry the original request with the new token
+                Cookies.set(ACCESS_TOKEN, newAccessToken); // Set the new access token
 
-                } catch (err) {
-                    // If refresh token fails, log the user out and redirect to login
-                    toast.error("Session expired. Please log in again.");
-                    localStorage.removeItem(ACCESS_TOKEN);
-                    localStorage.removeItem(REFRESH_TOKEN);
-                    window.location.href = '/login'; 
-                }
-            } else {
-                // No refresh token available, log the user out
-                toast.error("Session expired. Please log in again.");
-                localStorage.removeItem(ACCESS_TOKEN);
-                localStorage.removeItem(REFRESH_TOKEN);
-                window.location.href = '/login';  // Redirect to login page
-            }
+                // Retry the original request with the new token
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`; // Use new token here
+                return axios(originalRequest);
+            } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError.response ? refreshError.response.data : refreshError.message);
+                console.error('Refresh Error Details:', refreshError);
+                // Optional: Handle token refresh failure (e.g., redirect to login)
+                            }
         }
 
-        return Promise.reject(error); 
+        return Promise.reject(error);
     }
 );
+
+
 
 // Add the update method
 api.update = (url, data, config) => {

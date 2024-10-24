@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../api';
-import { getImageUrl } from '../../utils';
+import { getImageUrl } from '../../utils/utils';
 import { useNavigate } from 'react-router-dom';
 
 const EditProfile = ({ profile,handleSectionChange,setProfile }) => {

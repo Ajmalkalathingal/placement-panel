@@ -28,6 +28,7 @@ SECRET_KEY = 'django-insecure-f-!e-(l1w#@iz#d!)lo)ok$m1v15r4qz%u66#0-(^mz#gpf!@$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+    
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -43,7 +44,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework_simplejwt.token_blacklist',
 ]
 
 
@@ -58,10 +59,16 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':  timedelta(days=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    # 'ACCESS_TOKEN_LIFETIME':  timedelta(days=15),
+    # 'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    # 'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+
+        'ACCESS_TOKEN_LIFETIME': timedelta(seconds=60),  # 1 minute for testing
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=5), 
+    
+    # 'ROTATE_REFRESH_TOKENS': True,
+    # 'BLACKLIST_AFTER_ROTATION': True,
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
@@ -204,4 +211,8 @@ CORS_ALLOWS_CREDENTIALS = True
 #     "https://your-frontend-domain.com",
 #     "http://localhost:3000",  
 # ]
+
+
+
+
 

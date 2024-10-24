@@ -21,6 +21,7 @@ from .views import (
     JobListView,
     JobUpdateView,
     JobDeleteView,
+    AllJobListView,
 
     CourseChoicesView,
     RegisterStudentView,
@@ -30,11 +31,14 @@ from .views import (
 
     CordinatorProfileView,
 
+    export_student_registration_to_excel,
+    UploadStudentDataView
 )
 
 urlpatterns = [
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('api/token/refresh/', TokenRefreshSlidingView.as_view(), name='token_refresh'),
 
     # Signup routes for different user types
     path('signup/student/', StudentSignupView.as_view(), name='student_signup'),
@@ -58,9 +62,10 @@ urlpatterns = [
 
     # job
     path('recruiters/create-job-post/', JobCreateView.as_view(), name='recruiter-delete'),
-     path('jobs/', JobListView.as_view(), name='job-list'),
+    path('jobs/', JobListView.as_view(), name='job-list'),
     path('jobs/<int:pk>/update/', JobUpdateView.as_view(), name='job-update'),
     path('jobs/<int:pk>/delete/', JobDeleteView.as_view(), name='job-delete'),
+    path('jobs-lists/', AllJobListView.as_view(), name='job-delete'),
 
 
     # registration
@@ -72,6 +77,9 @@ urlpatterns = [
 
     # CoordinatorProfile
     path('coordinators/profile/', CordinatorProfileView.as_view(), name='recruiter-delete'),
+    # upload and download reg student 
+    path('upload-student-data/', UploadStudentDataView.as_view(), name='upload_student_data'),
+    path('export-student-registration/', export_student_registration_to_excel, name='export_student_registration'),
 
 
 ]

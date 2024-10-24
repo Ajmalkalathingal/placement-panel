@@ -6,7 +6,7 @@ import './style.css';
 const Home = () => {
   return (
     <>
-      <div className="container">
+      <div className="container ">
         <Nav />
       </div>
       <div className="hero my-5">

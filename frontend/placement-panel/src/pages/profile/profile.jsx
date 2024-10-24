@@ -2,22 +2,27 @@ import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import api from "../../api"; 
+import Cookies from 'js-cookie';
 import { ACCESS_TOKEN,REFRESH_TOKEN } from "../../constant";
 import StudentProfile from "../../componets/studentprofile";
 import CoordinateorProfile from "../../componets/coordinatorProfile";
 import RicruterRegistrationForm from "../../componets/ricuterprofile/Rregistrationform";
 import RecruterProfile from "../../componets/ricuterprofile";
+import { setTokenCookies } from "../../utils/cookies";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState(null);
-    const [isRecruiter, setIsRecruiter] = useState(false);  // New state to check if recruiter profile exists
+    const [isRecruiter, setIsRecruiter] = useState(false);
     const navigate = useNavigate();
-    const userType = localStorage.getItem('userType'); 
+    const userType = Cookies.get('user_type'); 
+
+   
 
     useEffect(() => {
-        if (!userType){
-            return navigate('/login');
+        if (!userType) {
+            navigate('/login');
+            return;
         }
 
         const fetchProfile = async () => {
@@ -36,29 +41,15 @@ function Profile() {
                 setProfile(response.data);
             } catch (err) {
                 console.error('Error fetching profile:', err);
-
-                if (err.response) {
-                    if (err.response.status === 401) {
-                        toast.error("Session expired. Please log in again.");
-                        localStorage.removeItem(ACCESS_TOKEN);
-                        localStorage.removeItem(REFRESH_TOKEN);
-                        navigate('/login');
-                    } else if (userType === 'recruiter' && err.response.status === 404) {
-                        // If recruiter profile does not exist (404), show registration form
-                        setIsRecruiter(true);
-                    } else {
-                        setError(err.response.data.error || 'Something went wrong, please try again.');
-                    }
-                } else {
-                    setError('Network error. Please try again later.');
-                }
+                Cookies.remove(ACCESS_TOKEN)
+                Cookies.remove(REFRESH_TOKEN)
+                navigate('/login')
             }
         };
 
         fetchProfile();
     }, [userType, navigate]);
 
-    // Handle recruiter registration form submission
     const handleRecruiterRegistration = async (formData) => {
         try {
             const response = await api.post('/api/recruiter/register/', formData);
@@ -78,25 +69,17 @@ function Profile() {
     if (!profile && !isRecruiter) {
         return <div>Loading...</div>;
     }
-    console.log(profile,"ggg")
+
     return (
         <div>
-            {userType === 'student' && (
-                <StudentProfile profile={profile} />
-            )}
-
-            {userType === 'coordinator' && (
-                <CoordinateorProfile profile={profile} />
-            )}
-
+            {userType === 'student' && <StudentProfile profile={profile} />}
+            {userType === 'coordinator' && <CoordinateorProfile profile={profile} />}
             {userType === 'recruiter' && (
                 <>
                     {isRecruiter ? (
                         <RicruterRegistrationForm onSubmit={handleRecruiterRegistration} />
                     ) : (
-                        <div>
-                           <RecruterProfile profile={profile}/>
-                        </div>
+                        <RecruterProfile profile={profile}/>
                     )}
                 </>
             )}

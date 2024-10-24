@@ -26,7 +26,8 @@ function App() {
         <Route path="/signup-for-recruiter" element={<SignUpRicuter />} />
         <Route path="/signup-for-coordinator" element={<SignupCoordinator />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
+
+        <Route path='/profile' element={ <Profile/>}/>
         </Routes>
       </div>
     </>

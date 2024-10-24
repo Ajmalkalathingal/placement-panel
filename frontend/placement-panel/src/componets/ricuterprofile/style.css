@@ -76,6 +76,8 @@ p {
 }
 
 .card {
+    overflow: hidden; /* Prevents overflow from card */
+    border-radius: 8px; /* Optional: rounded corners */
     position: relative;
     display: flex;
     flex-direction: column;
@@ -229,3 +231,44 @@ p {
     color:  #0072ff;
     font-size: large
 }
+
+/* .col-lg-9 {
+    overflow-x: auto; 
+} */
+
+.main-body {
+    padding: 20px; /* Adds padding around the main body */
+}
+
+
+/* modal  */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 500px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+
+  

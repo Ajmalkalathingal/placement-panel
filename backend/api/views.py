@@ -5,9 +5,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.authentication import TokenAuthentication
 from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.http import Http404
+from django.http import HttpResponse
+
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
         RecruiterProfileSerializer,
@@ -24,54 +26,65 @@ from django.shortcuts import get_object_or_404
 
 
 # Signup views for different user types
-class StudentSignupView(APIView):
-    permission_classes = [AllowAny] 
-    def post(self, request):
+
+class SignupView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, user_type):
         data = request.data.copy()
-        data['user_type'] = 'student'
+        data['user_type'] = user_type
+
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class RecruiterSignupView(APIView):
-    permission_classes = [AllowAny] 
-    def post(self, request):
-        data = request.data.copy()
-        data['user_type'] = 'recruiter'
-        serializer = UserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CoordinatorSignupView(APIView):
-    permission_classes = [AllowAny] 
-    def post(self, request):
-        data = request.data.copy()
-        data['user_type'] = 'coordinator'
-        serializer = UserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class VerifierSignupView(APIView):
+class StudentSignupView(SignupView):
     permission_classes = [AllowAny]
     def post(self, request):
-        data = request.data.copy()
-        data['user_type'] = 'verifier'
-        serializer = UserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return super().post(request, 'student')
 
-# Custom TokenObtainPair view for login
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+class RecruiterSignupView(SignupView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        return super().post(request, 'recruiter')
 
+class CoordinatorSignupView(SignupView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        return super().post(request, 'coordinator')
+
+class VerifierSignupView(SignupView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        return super().post(request, 'verifier')
+    
+
+class CustomTokenObtainPairView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = CustomTokenObtainPairSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Extract validated data
+        data = serializer.validated_data
+        
+        # Prepare the response
+        response = JsonResponse({
+            'message': 'Login successful',
+            'user_type': data.get('user_type'),  
+            'refresh_token': data.get('refresh_token'),  
+            'access_token': data.get('access_token')   
+        })
+        
+
+        return response
+        # deploymnet 
+        # response.set_cookie('access', data['access_token'], httponly=True, secure=True, samesite='None')
+        # response.set_cookie('refresh', data['refresh_token'], httponly=True, secure=True, samesite='None')
     # -----------------------------------------------------------------------------#
 
 
@@ -328,6 +341,15 @@ class JobListView(generics.ListAPIView):
     def get_queryset(self):
         return Job.objects.filter(recruiter__user=self.request.user)
     
+class AllJobListView(generics.ListAPIView):
+    serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Job.objects.all()
+    
+
+    
 class JobUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
@@ -358,3 +380,69 @@ class CordinatorProfileView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# exel upload for registration
+import pandas as pd
+
+def export_student_registration_to_excel(request):
+    student_data = StudentRegistration.objects.all()
+
+    # Create a list of dictionaries to pass to pandas
+    data = []
+    for student in student_data:
+        data.append({
+            'Student ID': student.student_id,
+            'Email': student.email,
+            'Registration Code': student.registration_code,
+            'Is Registered': 'Yes' if student.is_registered else 'No',
+            'Course': student.course
+        })
+
+    # Create a pandas DataFrame from the data
+    df = pd.DataFrame(data)
+
+    # Create a response object with the correct MIME type for Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=student_registration.xlsx'
+
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+
+    return response
+
+import pandas as pd
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.parsers import MultiPartParser
+from rest_framework.views import APIView
+from .models import StudentRegistration
+
+class UploadStudentDataView(APIView):
+    parser_classes = [MultiPartParser]  # To handle file upload
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        try:
+            # Get the uploaded file from the request
+            excel_file = request.FILES['file']
+            
+            # Read the Excel file using pandas
+            df = pd.read_excel(excel_file)
+
+            # Iterate over the rows and create StudentRegistration instances
+            for _, row in df.iterrows():
+                StudentRegistration.objects.update_or_create(
+                    student_id=row['Student ID'],
+                    defaults={
+                        'email': row['Email'],
+                        'registration_code': row['Registration Code'],
+                        'is_registered': row['Is Registered'] == 'Yes',
+                        'course': row['Course']
+                    }
+                )
+
+            return JsonResponse({'message': 'Data uploaded successfully'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+        
+        

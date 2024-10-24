@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './style.css';
+import './rstyle.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUser, faHome, faTachometerAlt, faTable, faBox, faUsers,
@@ -19,7 +19,7 @@ const CoordinatorProfile = ({ profile }) => {
     <div className="container-fluid">
       <div className="row">
         {/* Sidebar */}
-        <div className="col-lg-3 col-md-4 col-sm-12 bg-body-tertiary p-3 sidebar" >
+        <div className="col-lg-3 col-md-4 col-sm-12 bg-body-tertiary p-3 sidebar">
           <a href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
             <FontAwesomeIcon icon={faUser} className="me-2" />
             <span className="fs-4">Coordinator</span>
