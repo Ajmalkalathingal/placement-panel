@@ -21,7 +21,16 @@ from .views import (
     JobListView,
     JobUpdateView,
     JobDeleteView,
+
     AllJobListView,
+    apply_for_job,
+    AppliedJobListView,
+
+    JobApplicationsForRecruiterView,
+
+    UpdateApplicationStatusView,
+    unseen_applications_count,
+    mark_applications_as_seen,
 
     CourseChoicesView,
     RegisterStudentView,
@@ -32,7 +41,10 @@ from .views import (
     CordinatorProfileView,
 
     export_student_registration_to_excel,
-    UploadStudentDataView
+    UploadStudentDataView,
+
+    PasswordResetRequestView,
+    PasswordResetView,
 )
 
 urlpatterns = [
@@ -65,8 +77,15 @@ urlpatterns = [
     path('jobs/', JobListView.as_view(), name='job-list'),
     path('jobs/<int:pk>/update/', JobUpdateView.as_view(), name='job-update'),
     path('jobs/<int:pk>/delete/', JobDeleteView.as_view(), name='job-delete'),
-    path('jobs-lists/', AllJobListView.as_view(), name='job-delete'),
 
+    path('jobs-lists/', AllJobListView.as_view(), name='job-list'),
+    path('jobs/<int:job_id>/apply/', apply_for_job, name='apply_for_job'),
+    path('jobs/applied-list/', AppliedJobListView.as_view(), name='apply_for_job'),
+
+    path('recruiter/job-applications/', JobApplicationsForRecruiterView.as_view(), name='job-applications-for-recruiter'),
+    path('applications/unseen-count/', unseen_applications_count, name='unseen-applications-count'),
+    path('applications/mark-seen/', mark_applications_as_seen, name='mark-applications-as-seen'),
+    path('recruiter/job-applications/<int:pk>/',UpdateApplicationStatusView.as_view(), name='update-application-status'),
 
     # registration
     path('course-choices/', CourseChoicesView.as_view(), name='course-choices'),
@@ -77,9 +96,13 @@ urlpatterns = [
 
     # CoordinatorProfile
     path('coordinators/profile/', CordinatorProfileView.as_view(), name='recruiter-delete'),
+
     # upload and download reg student 
     path('upload-student-data/', UploadStudentDataView.as_view(), name='upload_student_data'),
     path('export-student-registration/', export_student_registration_to_excel, name='export_student_registration'),
+
+    path('password-reset-request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
+    path('reset-password/<str:token>/', PasswordResetView.as_view(), name='password_reset'),
 
 
 ]

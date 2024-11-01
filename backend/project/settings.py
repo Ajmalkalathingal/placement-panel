@@ -13,8 +13,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from celery.schedules import crontab
 import os
+from dotenv import load_dotenv
 from datetime import timedelta
+from cryptography.fernet import Fernet
 
+
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,11 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'corsheaders',
     'api',
     'rest_framework',
     'rest_framework_simplejwt',
-    # 'rest_framework_simplejwt.token_blacklist',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 
@@ -61,11 +66,9 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     # 'ACCESS_TOKEN_LIFETIME':  timedelta(days=15),
     # 'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
-    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    # 'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 
-        'ACCESS_TOKEN_LIFETIME': timedelta(seconds=60),  # 1 minute for testing
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=5), 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(hours=1), 
     
     # 'ROTATE_REFRESH_TOKENS': True,
     # 'BLACKLIST_AFTER_ROTATION': True,
@@ -158,16 +161,7 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
-# Celery Beat configuration
-CELERY_BEAT_SCHEDULE = {
-    'update-product-prices-daily': {
-        'task': 'project.tasks.send_job_post_email_to_students',
-        'schedule': crontab(hour=0, minute=0),  
-    },
-}
 
 
 # Email settings
@@ -213,6 +207,19 @@ CORS_ALLOWS_CREDENTIALS = True
 # ]
 
 
+# Retrieve the encryption key from environment variable
+encryption_key = os.getenv("ENCRYPTION_KEY")
+if encryption_key is None:
+    raise ValueError("ENCRYPTION_KEY environment variable is not set.")
+
+ENCRYPTION_KEY = encryption_key.encode()
+cipher = Fernet(ENCRYPTION_KEY)
 
 
 
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+]

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const EditProfile = ({ profile,handleSectionChange,setProfile }) => {
   const navigate = useNavigate();
+  let image = getImageUrl(profile.company_logo)
 
     const [formData, setFormData] = useState({
     firstName: profile.user.first_name || '',
@@ -13,10 +14,11 @@ const EditProfile = ({ profile,handleSectionChange,setProfile }) => {
     companyName: profile.company_name || '',
     position: profile.position || '',
     contactNumber: profile.contact_number || '',
-    company_logo: profile.company_logo || null, 
+    company_logo: image || null, 
   });
-
+console.log(formData.company_logo)
   // Handle input change
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -63,112 +65,113 @@ const EditProfile = ({ profile,handleSectionChange,setProfile }) => {
     }
   };
   return (
-    <>
-      <h1 className="text-primary">Edit Profile</h1>
+    <div className="container mt-5">
+      <h1 className="text-primary text-center">Edit Profile</h1>
       <hr />
       <div className="row">
-        {/* left column */}
-        <div className="col-md-4">
-          <div className="text-center">
+        {/* Left Column - Profile Picture Upload */}
+        <div className="col-md-4 text-center">
+          <div className="card p-3 mb-3">
             <img
-              src={null || 'https://bootdey.com/img/Content/avatar/avatar7.png'}
-              className="avatar img-circle img-thumbnail"
+              src={formData.company_logo || 'https://bootdey.com/img/Content/avatar/avatar7.png'}
+              className="avatar img-fluid rounded-circle mb-3"
               alt="avatar"
+              style={{ width: '150px', height: '150px', objectFit: 'cover' }}
             />
             <h6>Upload a different logo...</h6>
-            <input type="file" className="form-control" onChange={handleFileChange} />
+            <input type="file" className="form-control mt-2" onChange={handleFileChange} />
           </div>
         </div>
 
-        {/* edit form column */}
-        <div className="col-md-8 personal-info">
-          <h3>Personal info</h3>
-
-          <form className="form-horizontal" role="form" onSubmit={handleSubmit}>
-            {/* First Name */}
-            <div className="form-group">
-              <label className="col-lg-3 control-label">First name:</label>
-              <div className="col-lg-8">
-                <input
-                  className="form-control"
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
+        {/* Right Column - Edit Form */}
+        <div className="col-md-8">
+          <div className="card p-4">
+            <h3 className="mb-4">Personal Information</h3>
+            <form onSubmit={handleSubmit}>
+              {/* First Name */}
+              <div className="form-group row mb-3">
+                <label className="col-lg-3 col-form-label">First Name:</label>
+                <div className="col-lg-9">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Last Name */}
-            <div className="form-group">
-              <label className="col-lg-3 control-label">Last name:</label>
-              <div className="col-lg-8">
-                <input
-                  className="form-control"
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
+              {/* Last Name */}
+              <div className="form-group row mb-3">
+                <label className="col-lg-3 col-form-label">Last Name:</label>
+                <div className="col-lg-9">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Company Name */}
-            <div className="form-group">
-              <label className="col-lg-3 control-label">Company:</label>
-              <div className="col-lg-8">
-                <input
-                  className="form-control"
-                  type="text"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                />
+              {/* Company Name */}
+              <div className="form-group row mb-3">
+                <label className="col-lg-3 col-form-label">Company:</label>
+                <div className="col-lg-9">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Position */}
-            <div className="form-group">
-              <label className="col-lg-3 control-label">Position:</label>
-              <div className="col-lg-8">
-                <input
-                  className="form-control"
-                  type="text"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                />
+              {/* Position */}
+              <div className="form-group row mb-3">
+                <label className="col-lg-3 col-form-label">Position:</label>
+                <div className="col-lg-9">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="position"
+                    value={formData.position}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Contact Number */}
-            <div className="form-group">
-              <label className="col-lg-3 control-label">Contact Number:</label>
-              <div className="col-lg-8">
-                <input
-                  className="form-control"
-                  type="text"
-                  name="contactNumber"
-                  value={formData.contactNumber}
-                  onChange={handleChange}
-                />
+              {/* Contact Number */}
+              <div className="form-group row mb-3">
+                <label className="col-lg-3 col-form-label">Contact Number:</label>
+                <div className="col-lg-9">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="contactNumber"
+                    value={formData.contactNumber}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Submit button */}
-            <div className="form-group">
-              <div className="col-lg-8 col-lg-offset-3">
-                <button type="submit" className="btn btn-primary">
-                  Save Changes
-                </button>
+              {/* Submit Button */}
+              <div className="form-group row">
+                <div className="col-lg-9 offset-lg-3">
+                  <button type="submit" className="btn btn-primary">
+                    Save Changes
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-
       <hr />
-    </>
+    </div>
   );
 };
 

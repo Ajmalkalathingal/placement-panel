@@ -13,8 +13,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import Profile from './pages/profile/profile';
 import SignUpRicuter from './pages/signup/SignUpReicrutor';
 import SignupCoordinator from './pages/signup/signUpCoordinator';
+import ResetPassword from './pages/resetPassword/resetPassword';
+import RequestPasswordReset from './pages/requestresetpassword/RequestPasswordReset ';
 
 function App() {
+  
 
   return (
     <>
@@ -26,6 +29,8 @@ function App() {
         <Route path="/signup-for-recruiter" element={<SignUpRicuter />} />
         <Route path="/signup-for-coordinator" element={<SignupCoordinator />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<RequestPasswordReset />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         <Route path='/profile' element={ <Profile/>}/>
         </Routes>

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration
+from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,PasswordResetToken,JobApplication
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -207,3 +207,81 @@ class JobSerializer(serializers.ModelSerializer):
         
         job = Job.objects.create(recruiter=recruiter, **validated_data)
         return job
+
+
+class JobApplicationSerializer(serializers.ModelSerializer):
+    student = StudentProfileSerializer(read_only=True)
+    job = JobSerializer(read_only=True) 
+
+    class Meta:
+        model = JobApplication
+        fields = ['id', 'student', 'job', 'applied_on', 'status', 'is_seend']
+        read_only_fields = ['id', 'student', 'job', 'applied_on']
+
+
+#--------------------------------- password rest ----------------------------------------#
+from django.core.mail import send_mail
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No user with this email found.")
+        return value
+
+    def save(self):
+        user = User.objects.get(email=self.validated_data['email'])
+        encrypted_token = PasswordResetToken.generate_encrypted_token()
+        PasswordResetToken.objects.create(user=user, token=encrypted_token)
+
+        send_mail(
+            "Password Reset Link",
+            f"Your password reset link is: http://localhost:5173/reset-password/{encrypted_token}/. This link expires in 15 minutes.",
+            "calicut university.com",
+            [user.email]
+        )
+
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    token = serializers.CharField(max_length=255)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        token = attrs.get('token')
+
+        try:
+            user = User.objects.get(email=email)
+            token_instance = PasswordResetToken.objects.filter(user=user, is_used=False).first()
+
+            # Decrypt the stored token for comparison
+            decrypted_stored_token = PasswordResetToken.decrypt_token(token_instance.token) if token_instance else None
+            decrypted_received_token = PasswordResetToken.decrypt_token(token)
+
+            if not token_instance:
+                raise serializers.ValidationError("Token does not exist.")
+            if decrypted_received_token != decrypted_stored_token:
+                raise serializers.ValidationError("Tokens do not match.")
+            if not token_instance.is_valid():
+                raise serializers.ValidationError("Token has expired or is already used.")
+
+            attrs['user'] = user
+            return attrs
+
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid email or token.")
+        except Exception as e:
+            raise serializers.ValidationError(f"Error during token validation: {str(e)}")
+        
+    def reset_password(self):
+        # Custom method to reset the password
+        user = self.validated_data['user']
+        new_password = self.validated_data['new_password']
+        user.set_password(new_password)
+        user.save()
+        # Mark the token as used
+        PasswordResetToken.objects.filter(user=user).update(is_used=True)
+

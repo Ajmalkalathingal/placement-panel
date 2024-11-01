@@ -26,8 +26,14 @@ function Login() {
     }, [navigate]);
 
     const studentLogin = async (e) => {
-      // e.preventDefault();
+      e.preventDefault();
       setLoading(true);
+
+      if (!email || !password) {
+        toast.warn("Please fill in both email and password.");
+        setLoading(false);
+        return; 
+      }
     
     
       // Prepare login data
@@ -60,21 +66,34 @@ function Login() {
       }
     };
 
-  return (
-    <div className="wrapper">
-      <div className="signup-wrapper">
-        <h2 className="title">Login <span style={{ color: "#2970ff" }}></span></h2>
-        <form>
-          <Input label="Email" type="email" state={email} setState={setEmail} placeholder="Enter your email" />
-          <Input label="Password" type="password" state={password} setState={setPassword} placeholder="Enter password" />
-          <Button disabled={loading} text={loading ? "Loading" : "Login with Email"} onClick={studentLogin} />
-          <Link to={'/signup-for-student'}>Don't have an account? Sign up.</Link>
-        </form>
+    return (
+      <div className="wrapper">
+        <div className="signup-wrapper">
+          <h2 className="title">Login <span style={{ color: "#2970ff" }}></span></h2>
+          <form >
+          <Input required={true} label="Email" type="email" state={email} setState={setEmail} placeholder="Enter your email" />
+            <Input required ={true} label="Password" type="password" state={password} setState={setPassword} placeholder="Enter password" />
+            <Button 
+              disabled={loading} 
+              onClick={studentLogin} 
+              text={
+                loading ? (
+                  <span>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Loading
+                  </span>
+                ) : (
+                  "Login"
+                )
+              } 
+            />
+            <Link to={'/signup-for-student'}>Don't have an account? Sign up.</Link>
+            <br />
+            <Link to={'/reset-password'}>reset password.</Link>
+          </form>
+        </div>
       </div>
-        
-      <button onClick={studentLogin}>wwwwww</button>
-    </div>
-  );
+    );
 }
 
 export default Login;

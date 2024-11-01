@@ -33,8 +33,3 @@ def send_verification_email(recruiter_id):
     except RecruiterProfile.DoesNotExist:
         print(f"Recruiter with id {recruiter_id} not found.")
  
-@shared_task
-def my_task(arg1, arg2):
-    # Example task implementation
-    result = arg1 + arg2  # Replace this with your desired operation
-    return result

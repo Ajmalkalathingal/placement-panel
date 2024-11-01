@@ -1,5 +1,9 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.db import models
+import uuid
+from django.utils import timezone
+from cryptography.fernet import Fernet
+from django.conf import settings
 
 
 # Custom User Manager
@@ -164,5 +168,41 @@ class Job(models.Model):
 
     def __str__(self):
         return self.title   
+    
+
+class JobApplication(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='applications')
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
+    applied_on = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Pending'), ('reviewed', 'Reviewed'), ('rejected', 'Rejected'), ('accepted', 'Accepted')],
+        default='pending'
+    )
+    is_seend = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.student.user.email} applied for {self.job.title}'
 
 
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token = models.CharField(max_length=255)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_used = models.BooleanField(default=False)
+
+    def is_valid(self):
+        # Token expires after 15 minutes
+        return not self.is_used and (timezone.now() - self.created_at).seconds < 900
+
+    @staticmethod
+    def generate_encrypted_token():
+        # Generate a unique token and encrypt it with Fernet
+        raw_token = uuid.uuid4().hex
+        fernet = Fernet(settings.ENCRYPTION_KEY)
+        return fernet.encrypt(raw_token.encode()).decode()
+
+    @staticmethod
+    def decrypt_token(encrypted_token):
+        fernet = Fernet(settings.ENCRYPTION_KEY)
+        return fernet.decrypt(encrypted_token.encode()).decode()

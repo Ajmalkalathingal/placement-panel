@@ -1,6 +1,6 @@
 import Button from '../button';
 import './style.css'
-const Input = ({labal,state,setState,placeholder,type}) => {
+const Input = ({labal,state,setState,placeholder,type,required}) => {
     
   return (
     <div className="input-wrapper">
@@ -11,7 +11,7 @@ const Input = ({labal,state,setState,placeholder,type}) => {
         value={state}
         placeholder={placeholder}
         onChange={(e) => setState(e.target.value)}
-      />
+        required={required} />
     </div>
   );
 };

@@ -15,6 +15,7 @@ export const getMenuItems = (role) => {
                 { section: 'profile', label: 'Profile', icon: faUser },
                 { section: 'CreateJobpost', label: 'Create Job Post', icon: faCalendar },
                 { section: 'postlist', label: 'Post List', icon: faCalendar },
+                { section: 'updateProfile', label: 'Edit Profile', icon: faBox },
                 { section: 'appliedStudents', label: 'Applied Students', icon: faEdit },
             ];
         case 'Verifier':

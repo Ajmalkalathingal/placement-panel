@@ -2,11 +2,13 @@ amqp==5.2.0
 asgiref==3.8.1
 billiard==4.2.1
 celery==5.4.0
+cffi==1.17.1
 click==8.1.7
 click-didyoumean==0.3.1
 click-plugins==1.1.1
 click-repl==0.3.0
 colorama==0.4.6
+cryptography==43.0.3
 dj-database-url==2.2.0
 Django==5.1.1
 django-cors-headers==4.4.0
@@ -25,9 +27,11 @@ pillow==10.4.0
 prompt_toolkit==3.0.48
 psycopg-binary==3.2.2
 psycopg2-binary==2.9.9
+pycparser==2.22
 PyJWT==2.9.0
 python-dateutil==2.9.0.post0
 python-decouple==3.8
+python-dotenv==1.0.1
 pytz==2024.2
 redis==5.0.8
 six==1.16.0

@@ -9,8 +9,6 @@ const PostList = () => {
     const [editingJob, setEditingJob] = useState(null);
     const [updatedData, setUpdatedData] = useState({}); 
 
-    console.log(editingJob)
-    console.log(updatedData)
 
     useEffect(() => {
         fetchJobs();

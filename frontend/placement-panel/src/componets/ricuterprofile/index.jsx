@@ -8,20 +8,44 @@ import { getImageUrl } from '../../utils/utils';
 import CreateJobPost from './create_post';
 import PostList from './pos_list';
 import { getMenuItems } from '../../utils/menuItems';
+import AppliedStudentList from './appliedstudentlist';
+import api from '../../api';
 
 const RecruterProfile = ({ profile}) => {
     const menuItems = getMenuItems('Recruiter');
     const [activeSection, setActiveSection] = useState(menuItems[0].section);
     const [profiles, setProfile] = useState(profile);
+    const [unseenCount, setUnseenCount] = useState(0);
 
+    useEffect(() => {
+        const fetchUnseenCount = async () => {
+            const response = await api.get('/api/applications/unseen-count/');
+            console.log(response)
+            setUnseenCount(response.data.unseen_count);
+        };
+        fetchUnseenCount();
+    }, []);
+
+
+    const markApplicationsAsSeen = async () => {
+        await api.patch(`/api/applications/mark-seen/`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     const handleSectionChange = (section) => {
         setActiveSection(section);
+        if (section === 'appliedStudents') {
+            markApplicationsAsSeen();
+            setUnseenCount(0);  // Update count to zero after marking as seen
+        }
     };
 
     useEffect(() => {
-        setProfile(profile);
-    }, [profile]);
+        setProfile(profiles);
+    }, [profiles]);
 
     const imageUrl = getImageUrl(profiles.company_logo);
 
@@ -47,8 +71,8 @@ const RecruterProfile = ({ profile}) => {
                                         />
                                         <div className="mt-3">
                                             <h4>{profiles.company_name}</h4>
-                                            <p className="text-secondary mb-1">Position: {profiles.position}</p>
-                                            <p className="text-muted font-size-sm">Name: {profiles.user.first_name}</p>
+                                            <strong><p className="text-secondary mb-1">Position: {profiles.position}</p></strong>
+                                            <strong><p className="text-secondary font-size-sm">Name: {profiles.user.first_name}</p></strong>
                                         </div>
                                     </div>
                                     <hr className="my-4" />
@@ -59,6 +83,8 @@ const RecruterProfile = ({ profile}) => {
                                         <li key={item.section} className={activeSection === item.section ? 'active' : ''}>
                                             <a href="#" onClick={() => handleSectionChange(item.section)}>
                                                 <FontAwesomeIcon icon={item.icon} /> {item.label}
+                                                {item.section === 'appliedStudents' && <span className='badge bg-danger m-2 '>{item.section === 'appliedStudents' && unseenCount > 0 ? ` ${unseenCount}` : ''}</span> } 
+                                                
                                             </a>
                                         </li>
                                     ))}
@@ -66,18 +92,16 @@ const RecruterProfile = ({ profile}) => {
                                 </div>
                             </div>
                         </div>
-
+                       
                         <div className="col-lg-9">
                             {/* Dynamically render sections based on activeSection */}
                             {activeSection === 'profile' && <RHome profile={profiles} />}
                             {activeSection === 'CreateJobpost' && <CreateJobPost profile={profiles} />}
                             {activeSection === 'postlist' && <PostList />}
-                            {activeSection === 'appliedStudents' && <h1>Applied Students</h1>}
+                    {activeSection === 'appliedStudents' && <AppliedStudentList  />}
                             {activeSection === 'updateProfile' && (
                                 <EditProfile profile={profiles} setProfile={setProfile} handleSectionChange={handleSectionChange} />
                             )}
-                            {activeSection === 'manageUsers' && <h1>Manage Users</h1>}
-                            {activeSection === 'verifyPosts' && <h1>Verify Posts</h1>}
                         </div>
                     </div>
                 </div>

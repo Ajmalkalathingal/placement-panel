@@ -4,10 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.authentication import TokenAuthentication
-from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile
+import pandas as pd
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 
 from .serializers import (UserSerializer,
@@ -16,12 +18,15 @@ from .serializers import (UserSerializer,
         CustomTokenObtainPairSerializer,
         JobSerializer,
         RegistredStudentSerializer,
-        CoordinatorProfileSerializer
+        CoordinatorProfileSerializer,
+        PasswordResetRequestSerializer,
+        PasswordResetSerializer,
+        JobApplicationSerializer
         )   
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound,PermissionDenied
 from django.shortcuts import get_object_or_404
 
 
@@ -302,37 +307,64 @@ class RecruiterProfileDeleteView(generics.DestroyAPIView):
         return Response({"detail": "Recruiter profile deleted successfully."}, status=204)    
 
 
-from api.tasks import send_job_post_email_to_students
+from .tasks import send_job_post_email_to_students
 class JobCreateView(generics.CreateAPIView):
-    queryset = Job.objects.all()
     serializer_class = JobSerializer 
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(recruiter=self.request.user.recruiterprofile)
-        # self.send_email_to_students(job)
+        job = serializer.save(recruiter=self.request.user.recruiterprofile)
+        self.send_email_to_students(job)
 
-
-    def send_email_to_students(self, job_data):
-        # Get the recruiter object using the recruiter ID
-        recruiter_id = job_data['recruiter']
-        recruiter = get_object_or_404(RecruiterProfile, id=recruiter_id)
-
+    def send_email_to_students(self, job):
+        recruiter = job.recruiter
         student_emails = StudentProfile.objects.values_list('user__email', flat=True)
 
-        # Create the email content
-        subject = f"New Job Posting: {job_data['title']}"
+        subject = f"New Job Posting: {job.title}"
         message = (
             f"Dear Student,\n\n"
             f"A new job has been posted by {recruiter.company_name}.\n\n"
-            f"Job Title: {job_data['title']}\n"
-            f"Description: {job_data['description']}\n"
-            f"Location: {job_data['location']}\n\n"
+            f"Job Title: {job.title}\n"
+            f"Description: {job.description}\n"
+            f"Location: {job.location}\n\n"
             f"Best regards,\nYour University Job Portal"
         )
 
-        # Send the email using an asynchronous task (using Celery)
+        # Use Celery to send the email asynchronously
         send_job_post_email_to_students.delay(subject, message, list(student_emails))
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def apply_for_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    student_profile = request.user.studentprofile
+
+    # Check if already applied
+    if JobApplication.objects.filter(student=student_profile, job=job).exists():
+        return JsonResponse({'message': 'You have already applied for this job.'}, status=400)
+
+    # Create application
+    JobApplication.objects.create(student=student_profile, job=job)
+    return JsonResponse({'message': 'Application successful.'})
+
+
+class AllJobListView(generics.ListAPIView):
+    serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        applied_job_ids = JobApplication.objects.filter(student__user=self.request.user).values_list('job_id', flat=True)
+        
+        return Job.objects.exclude(id__in=applied_job_ids).order_by('-id')
+    
+class AppliedJobListView(generics.ListAPIView):
+    serializer_class = JobApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return JobApplication.objects.filter(student__user=self.request.user).order_by('-id')
+    
 
 class JobListView(generics.ListAPIView):
     serializer_class = JobSerializer
@@ -341,14 +373,6 @@ class JobListView(generics.ListAPIView):
     def get_queryset(self):
         return Job.objects.filter(recruiter__user=self.request.user)
     
-class AllJobListView(generics.ListAPIView):
-    serializer_class = JobSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Job.objects.all()
-    
-
     
 class JobUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Job.objects.all()
@@ -364,6 +388,67 @@ class JobDeleteView(generics.DestroyAPIView):
 
     def get_queryset(self):
         return Job.objects.filter(recruiter__user=self.request.user)
+    
+    
+class JobApplicationsForRecruiterView(generics.ListAPIView):
+    serializer_class = JobApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        recruiter = self.request.user
+        
+        # Get all jobs associated with the recruiter
+        jobs = Job.objects.filter(recruiter__user=recruiter)
+
+        # Check if the recruiter has jobs
+        if not jobs.exists():
+            raise PermissionDenied("You do not have permission to view applications for your jobs.")
+
+        # Filter applications for jobs created by the recruiter
+        return JobApplication.objects.filter(job__in=jobs)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def unseen_applications_count(request):
+    unseen_count = JobApplication.objects.filter(job__recruiter__user= request.user,is_seend=False).count()
+    return JsonResponse({'unseen_count': unseen_count})
+
+@api_view(['PATCH'])
+def mark_applications_as_seen(request):
+    JobApplication.objects.filter(job__recruiter__user= request.user,is_seend=False).update(is_seend=True,status='reviewed')
+    return JsonResponse({"status": "success"})  
+
+class UpdateApplicationStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            application = JobApplication.objects.get(pk=pk)
+
+            if application.job.recruiter.user != request.user:
+                print(f"Application recruiter: {application.job.recruiter}, Request user: {request.user}")
+                return Response({"detail": "Not authorized to update this application."}, status=status.HTTP_403_FORBIDDEN)
+
+            # Get new status from request data
+            new_status = request.data.get('status')
+            if new_status not in ['accepted', 'rejected', 'reviewed']:
+                return Response({"detail": "Invalid status."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Update the status
+            application.status = new_status
+            application.save()
+
+            return Response({"status": "Status updated successfully"}, status=status.HTTP_200_OK)
+
+        except JobApplication.DoesNotExist:
+            return Response({"detail": "Application not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    
 
 
 class CordinatorProfileView(APIView):
@@ -409,12 +494,6 @@ def export_student_registration_to_excel(request):
 
     return response
 
-import pandas as pd
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import MultiPartParser
-from rest_framework.views import APIView
-from .models import StudentRegistration
 
 class UploadStudentDataView(APIView):
     parser_classes = [MultiPartParser]  # To handle file upload
@@ -446,3 +525,46 @@ class UploadStudentDataView(APIView):
             return JsonResponse({'error': str(e)}, status=400)
         
         
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+from datetime import timedelta
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        
+        # Check rate limit (1 request per hour)
+        if PasswordResetToken.objects.filter(user__email=email, created_at__gte=timezone.now() - timedelta(hours=1)).exists():
+            return Response({"message": "Password reset request already made. Please wait an hour before trying again."},
+                            status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password reset link sent to email."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, token):
+        data = {
+            'email': request.data.get('email'),
+            'token': token,
+            'new_password': request.data.get('new_password'),
+        }
+        serializer = PasswordResetSerializer(data=data)
+        
+        if serializer.is_valid(): 
+            serializer.reset_password()
+            return Response({"message": "Password reset successfully."}, status=status.HTTP_200_OK)
+        
+        # If validation fails, return errors
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

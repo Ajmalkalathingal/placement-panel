@@ -9,6 +9,7 @@ import CoordinateorProfile from "../../componets/coordinatorProfile";
 import RicruterRegistrationForm from "../../componets/ricuterprofile/Rregistrationform";
 import RecruterProfile from "../../componets/ricuterprofile";
 import { setTokenCookies } from "../../utils/cookies";
+import TokenExpired from "../../componets/tokenExpire/TokenExpire";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -16,6 +17,8 @@ function Profile() {
     const [isRecruiter, setIsRecruiter] = useState(false);
     const navigate = useNavigate();
     const userType = Cookies.get('user_type'); 
+
+    const [tokenExpired, setTokenExpired] = useState(false);
 
    
 
@@ -40,10 +43,21 @@ function Profile() {
                 const response = await api.get(profileUrl);
                 setProfile(response.data);
             } catch (err) {
-                console.error('Error fetching profile:', err);
-                Cookies.remove(ACCESS_TOKEN)
-                Cookies.remove(REFRESH_TOKEN)
-                navigate('/login')
+                const status = err.response?.status;
+
+                if (status === 404 && userType === 'recruiter') {
+                    // Profile not found for recruiter, show registration form
+                    setIsRecruiter(true);
+                } else if (status === 401 || status === 403) {
+                    setTokenExpired(true);
+                    // Cookies.remove(ACCESS_TOKEN);
+                    // Cookies.remove(REFRESH_TOKEN);
+                    // navigate('/login');
+                } else {
+                    // Other errors, log error message or setError for display
+                    console.error('Error fetching profile:', err);
+                    setError("An unexpected error occurred. Please try again later.");
+                }
             }
         };
 
@@ -61,6 +75,10 @@ function Profile() {
             toast.error("Failed to register recruiter. Please try again.");
         }
     };
+
+    if (tokenExpired) {
+        return <TokenExpired/>;
+      }
 
     if (error) {
         return <div>Error: {error}</div>;

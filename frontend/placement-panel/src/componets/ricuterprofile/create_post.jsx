@@ -84,6 +84,18 @@ const CreateJobPost = (profile) => {
                                             required 
                                         />
                                     </div>
+                                    <div className="form-group">
+                                        <select 
+                                            className="form-control" 
+                                            name="job_type" 
+                                            value={formData.job_type} 
+                                            onChange={handleChange} 
+                                            required
+                                        >
+                                            <option value="full-time">Full-Time</option>
+                                            <option value="internship">Internship</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div className="col-md-6">
@@ -107,7 +119,7 @@ const CreateJobPost = (profile) => {
                                             required 
                                         />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group">DeadLine
                                         <input 
                                             type="datetime-local" 
                                             className="form-control" 
@@ -116,21 +128,6 @@ const CreateJobPost = (profile) => {
                                             onChange={handleChange} 
                                             required 
                                         />
-                                    </div>
-                                </div>
-
-                                <div className="col-md-12">
-                                    <div className="form-group">
-                                        <select 
-                                            className="form-control" 
-                                            name="job_type" 
-                                            value={formData.job_type} 
-                                            onChange={handleChange} 
-                                            required
-                                        >
-                                            <option value="full-time">Full-Time</option>
-                                            <option value="internship">Internship</option>
-                                        </select>
                                     </div>
                                 </div>
                             </div>

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User,StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,CoordinatorProfile
+from .models import User,StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,CoordinatorProfile,PasswordResetToken,JobApplication
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 class UserAdmin(BaseUserAdmin):
@@ -43,3 +43,5 @@ admin.site.register(Job)
 admin.site.register(StudentRegistration)
 admin.site.register(CoordinatorRegistration)
 admin.site.register(CoordinatorProfile)
+admin.site.register(PasswordResetToken)
+admin.site.register(JobApplication)
