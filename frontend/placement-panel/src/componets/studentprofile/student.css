@@ -392,6 +392,37 @@ a{
 
 /* jejr */
 
+/* Applied Job Cards */
+.card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Pagination Buttons */
+.pagination .page-item .page-link {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination .page-item .page-link:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Active Pagination Button */
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: bold;
+}
+
+
 
 .card {
     transition: transform 0.2s, box-shadow 0.2s;

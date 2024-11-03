@@ -334,6 +334,7 @@ class JobCreateView(generics.CreateAPIView):
         send_job_post_email_to_students.delay(subject, message, list(student_emails))
 
 
+from .tasks import send_application_notification
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def apply_for_job(request, job_id):
@@ -345,7 +346,11 @@ def apply_for_job(request, job_id):
         return JsonResponse({'message': 'You have already applied for this job.'}, status=400)
 
     # Create application
-    JobApplication.objects.create(student=student_profile, job=job)
+    job_application = JobApplication.objects.create(student=student_profile, job=job)
+
+    # Send email notification to the recruiter via Celery task
+    send_application_notification.delay(job_application.id)
+
     return JsonResponse({'message': 'Application successful.'})
 
 
@@ -396,15 +401,12 @@ class JobApplicationsForRecruiterView(generics.ListAPIView):
 
     def get_queryset(self):
         recruiter = self.request.user
-        
-        # Get all jobs associated with the recruiter
         jobs = Job.objects.filter(recruiter__user=recruiter)
 
         # Check if the recruiter has jobs
         if not jobs.exists():
             raise PermissionDenied("You do not have permission to view applications for your jobs.")
 
-        # Filter applications for jobs created by the recruiter
         return JobApplication.objects.filter(job__in=jobs)
 
     def list(self, request, *args, **kwargs):
@@ -526,9 +528,6 @@ class UploadStudentDataView(APIView):
         
         
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from django.utils import timezone
 from datetime import timedelta
 

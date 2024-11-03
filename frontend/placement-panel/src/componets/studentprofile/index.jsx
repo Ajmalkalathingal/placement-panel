@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import "./student.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faCalendar, faEdit } from '@fortawesome/free-solid-svg-icons';
-import api from '../../api';
 import { getImageUrl } from '../../utils/utils';
 import EditProfile from './EditProfile';
 import JobList from './jobLists';
 import AppliedJobPost from './appliedjobpost';
+import { getMenuItems } from '../../utils/menuItems';
 
 
 const StudentProfile = ({ profile }) => {
-  const [activeSection, setActiveSection] = useState('profile');
+  const menuItems = getMenuItems('Student');
+  const [activeSection, setActiveSection] = useState(menuItems[0].section);
   const [profiles, setProfile] = useState(profile);
 
 
@@ -39,21 +39,13 @@ const StudentProfile = ({ profile }) => {
           </div>
 
           <ul className="p-1 mt-2 ml-3 space text" style={{ listStyle: 'none' }}>
-            <li className={activeSection === 'profile' ? 'active' : ''}>
-              <a href="#" onClick={() => handleSectionChange('profile')}>
-                <FontAwesomeIcon icon={faUser} /> Profile
-              </a>
-            </li>
-            <li className={activeSection === 'Applied Jobs' ? 'active' : ''}>
-              <a href="#" onClick={() => handleSectionChange('Applied Jobs')}>
-                <FontAwesomeIcon icon={faCalendar} /> Applied Jobs
-              </a>
-            </li>
-            <li className={activeSection === 'updateProfile' ? 'active' : ''}>
-              <a href="#" onClick={() => handleSectionChange('updateProfile')}>
-                <FontAwesomeIcon icon={faEdit} /> Edit Profile
-              </a>
-            </li>
+          {menuItems.map((item) => (
+                <li key={item.section} className={activeSection === item.section ? 'active' : ''}>
+                    <a href="#" onClick={() => handleSectionChange(item.section)}>
+                        <FontAwesomeIcon icon={item.icon} /> {item.label}   
+                    </a>
+                </li>
+            ))}
           </ul>
         </div>
         </div>
@@ -106,7 +98,7 @@ const StudentProfile = ({ profile }) => {
             )}
 
             {/* Recent Activity Section */}
-            {activeSection === 'Applied Jobs' &&  (<AppliedJobPost  />) }
+            {activeSection === 'appliedJobs' &&  (<AppliedJobPost  />) }
 
 
             {/* Update Profile Section */}

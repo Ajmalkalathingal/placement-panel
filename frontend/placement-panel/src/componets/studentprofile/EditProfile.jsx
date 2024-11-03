@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../../api";
 import { toast } from "react-toastify";
+import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 
 const EditProfile = ({profile}) => {
 
@@ -54,28 +55,64 @@ const EditProfile = ({profile}) => {
     };
 
     return <>
-                <div className='container'>
-              <h2 className="post mt-2" style={{color:' #0072ff'}}>Edit Profile</h2>
-              <form className='mt-3' onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label htmlFor="profileImage">Profile Image</label>
-                  <input type="file" className="form-control" id="profileImage" onChange={handleProfileImageChange} accept="image/*" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="resume">Resume</label>
-                  <input type="file" className="form-control" id="resume" onChange={handleResumeChange} accept=".pdf,.doc,.docx" />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="firstName">First Name</label>
-                  <input type="text" className="form-control" id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="lastName">Last Name</label>
-                  <input type="text" className="form-control" id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </div>
-                <button type="submit" className="btn btn-primary">Update Profile</button>
-              </form>
-            </div>
+      <Container className="mt-4">
+      <h2 className="text-center text-primary mb-4">Edit Profile</h2>
+      <Form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm bg-light">
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="profileImage">
+              <Form.Label>Profile Image</Form.Label>
+              <Form.Control
+                type="file"
+                onChange={handleProfileImageChange}
+                accept="image/*"
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="resume">
+              <Form.Label>Resume</Form.Label>
+              <Form.Control
+                type="file"
+                onChange={handleResumeChange}
+                accept=".pdf,.doc,.docx"
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group controlId="firstName">
+              <Form.Label>First Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Enter your first name"
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group controlId="lastName">
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Enter your last name"
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <div className="text-center">
+          <Button type="submit" className="mt-3" variant="primary">
+            Update Profile
+          </Button>
+        </div>
+      </Form>
+    </Container>
             </>
 }
 
