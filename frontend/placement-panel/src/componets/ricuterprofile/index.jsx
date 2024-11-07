@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faCalendar, faEdit } from "@fortawesome/free-solid-svg-icons";
 import RHome from "./RHome";
 import EditProfile from "./editprofile";
 import { getImageUrl } from "../../utils/utils";
@@ -19,7 +20,6 @@ const RecruterProfile = ({ profile }) => {
   useEffect(() => {
     const fetchUnseenCount = async () => {
       const response = await api.get("/api/applications/unseen-count/");
-      console.log(response);
       setUnseenCount(response.data.unseen_count);
     };
     fetchUnseenCount();
@@ -84,6 +84,7 @@ const RecruterProfile = ({ profile }) => {
                     </div>
                   </div>
                   <hr className="my-4" />
+
                   {/* Render Sidebar Component */}
                   <ul className="p-1 mt-2 space" style={{ listStyle: "none" }}>
                     {menuItems.map((item) => (

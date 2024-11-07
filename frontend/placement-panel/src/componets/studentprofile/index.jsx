@@ -23,7 +23,7 @@ const StudentProfile = ({ profile }) => {
     setProfile(profile);
 }, [profile]);
 
-
+console.log(profile)
    const imageUrl = getImageUrl(profiles.img);
   return (
     <div className="bootstrap snippets bootdey">
@@ -73,7 +73,19 @@ const StudentProfile = ({ profile }) => {
                       <p><span>Email </span>: {profiles.user.email}</p>
                     </div>
                     <div className="bio-row">
-                      <p><span>Registration </span>: {profiles.registration.student_id}</p>
+                      <p><span>Registration </span>: {profiles.registration.registration_number}</p>
+                    </div>
+                    <div className="bio-row">
+                      <p><span>Course </span>: {profiles.registration.course}</p>
+                    </div>
+                    <div className="bio-row">
+                      <p><span>Starting Date </span>: {profiles.registration.starting_date}</p>
+                    </div>
+                    <div className="bio-row">
+                      <p><span>Eding Date </span>: {profiles.registration.ending_date}</p>
+                    </div>
+                    <div className="bio-row">
+                      <p><span>Duration </span>: {profiles.registration.duration}</p>
                     </div>
                     <div className="bio-row">
                     <p>

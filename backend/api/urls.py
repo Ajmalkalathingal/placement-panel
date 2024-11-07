@@ -32,6 +32,8 @@ from .views import (
     unseen_applications_count,
     mark_applications_as_seen,
 
+    InterviewDetailsCreateView,
+
     CourseChoicesView,
     RegisterStudentView,
     RegistredStudentListView,
@@ -86,6 +88,8 @@ urlpatterns = [
     path('applications/unseen-count/', unseen_applications_count, name='unseen-applications-count'),
     path('applications/mark-seen/', mark_applications_as_seen, name='mark-applications-as-seen'),
     path('recruiter/job-applications/<int:pk>/',UpdateApplicationStatusView.as_view(), name='update-application-status'),
+
+    path('interview-details/<int:job_application_id>/', InterviewDetailsCreateView.as_view(), name='interview-details-create'),
 
     # registration
     path('course-choices/', CourseChoicesView.as_view(), name='course-choices'),

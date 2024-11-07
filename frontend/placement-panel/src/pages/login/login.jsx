@@ -41,7 +41,6 @@ function Login() {
         email: email,     
         password: password
       };
-      console.log(data)
     
       try {
         const tokenResponse = await api.post("/api/token/", data);

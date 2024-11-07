@@ -1,6 +1,7 @@
 # tasks.py
 from celery import shared_task
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.conf import settings
 from .models import JobApplication,RecruiterProfile, User
 
@@ -54,4 +55,15 @@ def send_verification_email(recruiter_id):
 
     except RecruiterProfile.DoesNotExist:
         print(f"Recruiter with id {recruiter_id} not found.")
- 
+
+
+@shared_task
+def send_interview_email_task(recruiter_email, student_email, subject, message):
+    email = EmailMessage(
+        subject=subject,
+        body=message,
+        from_email=settings.EMAIL_HOST_USER, 
+        to=[student_email],                  
+        reply_to=[recruiter_email]   
+    )
+    email.send(fail_silently=False)

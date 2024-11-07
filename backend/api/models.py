@@ -81,14 +81,16 @@ class StudentRegistration(models.Model):
         # Add more courses
     )
 
-    student_id = models.CharField(max_length=20, unique=True)
-    email = models.EmailField(unique=True)
-    registration_code = models.CharField(max_length=100, null=True, blank=True)
+    registration_number= models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    course = models.CharField(max_length=10, choices=COURSE_CHOICES, null=True, blank=True)
+    duration = models.CharField(max_length=10)
+    starting_date = models.DateField()
+    ending_date = models.DateField()
     is_registered = models.BooleanField(default=False) 
-    course = models.CharField(max_length=10, choices=COURSE_CHOICES, null=True, blank=True) 
 
     def __str__(self):
-        return f'{self.student_id} - {self.email} - Course: {self.course} - Registered: {self.is_registered}'
+        return f'{self.registration_number} - {self.name} - Course: {self.course} - Registered: {self.is_registered}'
     
 
 class CoordinatorRegistration(models.Model):
@@ -180,9 +182,24 @@ class JobApplication(models.Model):
         default='pending'
     )
     is_seend = models.BooleanField(default=False)
+    email_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.student.user.email} applied for {self.job.title}'
+
+
+class InterviewDetails(models.Model):
+    job_application = models.OneToOneField(JobApplication, on_delete=models.CASCADE, related_name='interview_detail')
+    venue = models.CharField(max_length=255)
+    time = models.DateTimeField()
+    other_details = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    emailSent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Interview for {self.job_application.job.title} at {self.venue} on {self.time}"
+
 
 
 class PasswordResetToken(models.Model):

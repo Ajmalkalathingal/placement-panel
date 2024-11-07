@@ -128,7 +128,6 @@ function RicruterRegistrationForm({onSubmit}) {
           {/* Hirer Form */}
           <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <h3 className="register-heading">Apply as a Ricruter</h3>
-            {/* Add hirer form fields similar to the employee */}
           </div>
         </div>
       </div>

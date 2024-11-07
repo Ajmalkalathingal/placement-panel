@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import api from "../../api";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faBook, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faBook, faEnvelope, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 
-const Registration = ({}) => {
+const Registration = () => {
   const [courses, setCourses] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
 
   const [formData, setFormData] = useState({
-    student_id: '',
+    registration_number: '',
+    name: '',
     course: '',
-    email: '',
-    terms: false
+    duration: '',
+    starting_date: '',
+    ending_date: '',
+    is_registered: false,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,16 +31,14 @@ const Registration = ({}) => {
         setLoading(false);
       }
     };
-
     fetchCourses(); 
   }, []);
-
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value // Handle checkbox
+      [name]: type === 'checkbox' ? checked : value 
     });
   };
 
@@ -47,12 +48,42 @@ const Registration = ({}) => {
     setSuccess(''); 
 
     try {
- 
       const response = await api.post("api/register/", formData);
       setSuccess('Registration successful!'); 
     } catch (error) {
       console.error("Error during registration:", error);
-      setError('Registration failed. Please try again.'+ error);
+      setError('Registration failed. Please try again.' + error);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  const handleSubmitPdf = async (e) => {
+    e.preventDefault();
+
+    if (!selectedFile) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const uploadData = new FormData();
+    uploadData.append('file', selectedFile);
+
+    try {
+      const response = await api.post('/api/upload-student-data/', uploadData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.status === 200) {
+        alert('File uploaded successfully!');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file.');
     }
   };
 
@@ -60,38 +91,6 @@ const Registration = ({}) => {
     return <div>Loading...</div>; 
   }
 
-
-
-  const handleFileChange = (e) => {
-      setSelectedFile(e.target.files[0]);
-  };
-
-  const handleSubmitPdf = async (e) => {
-      e.preventDefault();
-
-      if (!selectedFile) {
-          alert("Please select a file.");
-          return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      try {
-          const response = await api.post('/api/upload-student-data/', formData, {
-              headers: {
-                  'Content-Type': 'multipart/form-data'
-              }
-          });
-
-          if (response.status === 200) {
-              alert('File uploaded successfully!');
-          }
-      } catch (error) {
-          console.error('Error uploading file:', error);
-          alert('Failed to upload file.');
-      }
-  };
   return (
     <>
       <div className="card text-black" style={{ borderRadius: "25px" }}>
@@ -106,20 +105,37 @@ const Registration = ({}) => {
               {success && <div className="alert alert-success">{success}</div>} 
 
               <form className="mx-1 mx-md-4" onSubmit={handleSubmit}>
-             
+
                 <div className="d-flex flex-row align-items-center mb-4">
                   <FontAwesomeIcon icon={faUser} size="lg" className="me-3" />
                   <div className="form-outline flex-fill mb-0">
                     <input
                       type="text"
-                      name="student_id" 
-                      value={formData.registrationId}
+                      name="registration_number" 
+                      value={formData.registration_number}
                       onChange={handleChange}
                       className="form-control"
                       required
                     />
-                    <label className="form-label" htmlFor="form3Example1c">
-                      Registration ID
+                    <label className="form-label">
+                      Registration Number
+                    </label>
+                  </div>
+                </div>
+
+                <div className="d-flex flex-row align-items-center mb-4">
+                  <FontAwesomeIcon icon={faUser} size="lg" className="me-3" />
+                  <div className="form-outline flex-fill mb-0">
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="form-control"
+                      required
+                    />
+                    <label className="form-label">
+                      Name
                     </label>
                   </div>
                 </div>
@@ -143,7 +159,7 @@ const Registration = ({}) => {
                         </option>
                       ))}
                     </select>
-                    <label className="form-label" htmlFor="formCourse">
+                    <label className="form-label">
                       Course
                     </label>
                   </div>
@@ -153,15 +169,49 @@ const Registration = ({}) => {
                   <FontAwesomeIcon icon={faEnvelope} size="lg" className="me-3" />
                   <div className="form-outline flex-fill mb-0">
                     <input
-                      type="email"
-                      name="email"
+                      type="text"
+                      name="duration"
                       value={formData.email}
                       onChange={handleChange}
                       className="form-control"
                       required
                     />
-                    <label className="form-label" htmlFor="form3Example3c">
-                      Email
+                    <label className="form-label">
+                    duration
+                    </label>
+                  </div>
+                </div>
+
+                <div className="d-flex flex-row align-items-center mb-4">
+                  <FontAwesomeIcon icon={faCalendarAlt} size="lg" className="me-3" />
+                  <div className="form-outline flex-fill mb-0">
+                    <input
+                      type="date"
+                      name="starting_date"
+                      value={formData.starting_date}
+                      onChange={handleChange}
+                      className="form-control"
+                      required
+                    />
+                    <label className="form-label">
+                      Starting Date
+                    </label>
+                  </div>
+                </div>
+
+                <div className="d-flex flex-row align-items-center mb-4">
+                  <FontAwesomeIcon icon={faCalendarAlt} size="lg" className="me-3" />
+                  <div className="form-outline flex-fill mb-0">
+                    <input
+                      type="date"
+                      name="ending_date"
+                      value={formData.ending_date}
+                      onChange={handleChange}
+                      className="form-control"
+                      required
+                    />
+                    <label className="form-label">
+                      Ending Date
                     </label>
                   </div>
                 </div>
@@ -170,14 +220,12 @@ const Registration = ({}) => {
                   <input
                     className="form-check-input me-2"
                     type="checkbox"
-                    name="terms"
-                    checked={formData.terms}
+                    name="is_registered"
+                    checked={formData.is_registered}
                     onChange={handleChange}
-                    required
                   />
-                  <label className="form-check-label" htmlFor="form2Example3">
-                    I agree to all statements in{" "}
-                    <a href="#!">Terms of service</a>
+                  <label className="form-check-label">
+                    Registered
                   </label>
                 </div>
 
@@ -200,12 +248,12 @@ const Registration = ({}) => {
         </div>
       </div>
       <div>
-            <h2>Upload Student Data</h2>
-            <form onSubmit={handleSubmitPdf}>
-                <input type="file" accept=".xlsx" onChange={handleFileChange} />
-                <button type="submit">Upload</button>
-            </form>
-        </div>
+        <h2>Upload Student Data</h2>
+        <form onSubmit={handleSubmitPdf}>
+          <input type="file" accept=".xlsx" onChange={handleFileChange} />
+          <button type="submit">Upload</button>
+        </form>
+      </div>
     </>
   );
 };

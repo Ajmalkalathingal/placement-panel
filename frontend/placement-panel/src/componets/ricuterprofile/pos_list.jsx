@@ -17,7 +17,7 @@ const PostList = () => {
     const fetchJobs = async () => {
         try {
             const response = await api.get('/api/jobs/');
-            setJobs(response.data);
+            setJobs(response.data.results);
         } catch (error) {
             console.error("Error fetching jobs:", error);
         }

@@ -7,10 +7,12 @@ from .permissions import IsStudent,IsCoordinator,IsRecruiter,IsVerifier
 import pandas as pd
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication
+from .tasks import send_application_notification,send_interview_email_task
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication,InterviewDetails
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
+from django.core.exceptions import ValidationError
 
 from .serializers import (UserSerializer,
         StudentProfileSerializer,   
@@ -21,7 +23,8 @@ from .serializers import (UserSerializer,
         CoordinatorProfileSerializer,
         PasswordResetRequestSerializer,
         PasswordResetSerializer,
-        JobApplicationSerializer
+        JobApplicationSerializer,
+        InterviewDetailsSerializer
         )   
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
@@ -334,7 +337,7 @@ class JobCreateView(generics.CreateAPIView):
         send_job_post_email_to_students.delay(subject, message, list(student_emails))
 
 
-from .tasks import send_application_notification
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def apply_for_job(request, job_id):
@@ -353,30 +356,30 @@ def apply_for_job(request, job_id):
 
     return JsonResponse({'message': 'Application successful.'})
 
-
 class AllJobListView(generics.ListAPIView):
     serializer_class = JobSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         applied_job_ids = JobApplication.objects.filter(student__user=self.request.user).values_list('job_id', flat=True)
-        
-        return Job.objects.exclude(id__in=applied_job_ids).order_by('-id')
-    
-class AppliedJobListView(generics.ListAPIView):
-    serializer_class = JobApplicationSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return JobApplication.objects.filter(student__user=self.request.user).order_by('-id')
-    
+        return Job.objects.exclude(id__in=applied_job_ids).order_by('-id') 
 
 class JobListView(generics.ListAPIView):
     serializer_class = JobSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Job.objects.filter(recruiter__user=self.request.user)
+        return Job.objects.filter(recruiter__user=self.request.user).order_by('-id') 
+
+    
+class AppliedJobListView(generics.ListAPIView):
+    serializer_class = JobApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Ensure that the queryset is ordered
+        return JobApplication.objects.filter(student__user=self.request.user).order_by('-applied_on') 
+    
     
     
 class JobUpdateView(generics.RetrieveUpdateAPIView):
@@ -416,13 +419,14 @@ class JobApplicationsForRecruiterView(generics.ListAPIView):
 
 @api_view(['GET'])
 def unseen_applications_count(request):
-    unseen_count = JobApplication.objects.filter(job__recruiter__user= request.user,is_seend=False).count()
+    unseen_count = JobApplication.objects.filter(job__recruiter__user= request.user,status='pending').count()
     return JsonResponse({'unseen_count': unseen_count})
 
 @api_view(['PATCH'])
 def mark_applications_as_seen(request):
-    JobApplication.objects.filter(job__recruiter__user= request.user,is_seend=False).update(is_seend=True,status='reviewed')
+    JobApplication.objects.filter(job__recruiter__user= request.user,is_seend=False).update(status='reviewed')
     return JsonResponse({"status": "success"})  
+
 
 class UpdateApplicationStatusView(APIView):
     permission_classes = [IsAuthenticated]
@@ -450,7 +454,47 @@ class UpdateApplicationStatusView(APIView):
             return Response({"detail": "Application not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
-    
+
+
+class InterviewDetailsCreateView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = InterviewDetailsSerializer
+
+    def perform_create(self, serializer):
+        # Retrieve the job application based on the provided ID
+        job_application_id = self.request.data.get("job_application_id")
+        
+        try:
+            job_application = get_object_or_404(JobApplication, id=job_application_id)
+            job_application.email_sent = True  
+            job_application.save()
+        except JobApplication.DoesNotExist:
+            raise ValidationError("Job application not found.")
+
+        # Save the interview details with the associated job application
+        
+        interview_detail = serializer.save(job_application=job_application, emailSent=True)
+        
+        # Send the interview email
+        self.send_interview_email(interview_detail)
+
+    def send_interview_email(self, interview_detail):
+        recruiter_email = self.request.user.email
+        student_email = interview_detail.job_application.student.user.email
+
+        subject = "Interview Details for Your Application"
+        message = (
+            f"Hello {interview_detail.job_application.student.user.first_name},\n\n"
+            f"Here are your interview details:\n"
+            f"Venue: {interview_detail.venue}\n"
+            f"Time: {interview_detail.time}\n"
+            f"Other Details: {interview_detail.other_details}\n\n"
+            "Best of luck with your interview!\n\n"
+            "Best Regards,\nYour Company"
+        )
+
+        send_interview_email_task.delay(recruiter_email, student_email, subject, message)
+
 
 
 class CordinatorProfileView(APIView):
@@ -477,11 +521,13 @@ def export_student_registration_to_excel(request):
     data = []
     for student in student_data:
         data.append({
-            'Student ID': student.student_id,
-            'Email': student.email,
-            'Registration Code': student.registration_code,
+            'name' : student.name,
+            'registration_number': student.registration_number,
+            'Course': student.course,
+            'duration': student.duration,
+            'starting_date': student.starting_date,
+            'ending_date' : student.ending_date,
             'Is Registered': 'Yes' if student.is_registered else 'No',
-            'Course': student.course
         })
 
     # Create a pandas DataFrame from the data
@@ -512,12 +558,15 @@ class UploadStudentDataView(APIView):
             # Iterate over the rows and create StudentRegistration instances
             for _, row in df.iterrows():
                 StudentRegistration.objects.update_or_create(
-                    student_id=row['Student ID'],
+                    registration_number=row['registration_number'],
                     defaults={
-                        'email': row['Email'],
-                        'registration_code': row['Registration Code'],
-                        'is_registered': row['Is Registered'] == 'Yes',
-                        'course': row['Course']
+                        'name': row['name'],
+                        'registration_number':row['registration_number'],
+                        'course': row['course'],
+                        'duration' : row['duration'],
+                        'starting_date' : row['starting_date'],
+                        'ending_date': row['ending_date'],
+                        'is_registered': row['Is Registered'],
                     }
                 )
 

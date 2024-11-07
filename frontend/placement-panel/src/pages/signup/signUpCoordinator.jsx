@@ -119,9 +119,6 @@ function SignupCoordinator() {
           </form>
         </div>
       </div>
-
-      
-      <button onClick={studentSignup}>wwwwww</button>
     </>
   );
 }

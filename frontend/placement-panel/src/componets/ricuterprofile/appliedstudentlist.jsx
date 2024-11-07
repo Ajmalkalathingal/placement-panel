@@ -10,11 +10,16 @@ import {
   Button,
 } from "react-bootstrap";
 import api from "../../api";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import InterviewDetailsModal from "./InterviewDetailsModal";
 
 const AppliedStudentList = () => {
   const [students, setStudents] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     const fetchAppliedStudents = async () => {
@@ -34,7 +39,9 @@ const AppliedStudentList = () => {
 
   const handleStatusChange = async (studentId, status) => {
     try {
-      await api.patch(`/api/recruiter/job-applications/${studentId}/`, { status });
+      await api.patch(`/api/recruiter/job-applications/${studentId}/`, {
+        status,
+      });
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
           student.id === studentId ? { ...student, status } : student
@@ -44,6 +51,23 @@ const AppliedStudentList = () => {
       console.error("Error updating status", err);
       setError("Failed to update student status");
     }
+  };
+
+  const handleShowModal = (student) => {
+    setSelectedStudent(student);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleEmailSent = (studentId) => {
+    setStudents((prevStudents) =>
+      prevStudents.map((student) =>
+        student === studentId ? { ...student, emailSent: true } : student
+      )
+    );
   };
 
   if (loading) {
@@ -57,7 +81,7 @@ const AppliedStudentList = () => {
   if (error) {
     return <p className="text-center text-danger">{error}</p>;
   }
-
+  console.log(students);
   return (
     <Container className="mt-5">
       <h2 className="text-primary mb-4 text-center">
@@ -133,27 +157,50 @@ const AppliedStudentList = () => {
                       {student.status.charAt(0).toUpperCase() +
                         student.status.slice(1)}
                     </Badge>
-                    <div>
-                      <label className="mt-2">
-                        <input
-                          type="radio"
-                          name={`status-${student.id}`}
-                          value="accepted"
-                          checked={student.status === "accepted"}
-                          onChange={() => handleStatusChange(student.id, "accepted")}
-                        />
-                        Accepted
-                      </label>
-                      <label className="p-2">
-                        <input
-                          type="radio"
-                          name={`status-${student.id}`}
-                          value="rejected"
-                          checked={student.status === "rejected"}
-                          onChange={() => handleStatusChange(student.id, "rejected")}
-                        />
-                        Rejected
-                      </label>
+                    <div className="mt-2">
+                      {!student.email_sent ? (
+                        <Button
+                          variant="primary"
+                          className="me-2 d-flex align-items-center"
+                          onClick={() => handleShowModal(student.id)}
+                        >
+                          <FontAwesomeIcon
+                            icon={faPaperPlane}
+                            className="me-2"
+                          />{" "}
+                          {/* Send Icon */}
+                          Send Interview Details
+                        </Button>
+                      ) : (
+                        <div className="d-flex align-items-center">
+                          <FontAwesomeIcon
+                            icon={faCheckCircle}
+                            className="text-success me-2"
+                          />{" "}
+                          {/* Success Icon */}
+                          <span className="">Email Sent</span>
+                        </div>
+                      )}
+                      {student.status === "rejected" ? (
+                        <Button
+                          variant="success"
+                          onClick={() =>
+                            handleStatusChange(student.id, "accepted")
+                          }
+                        >
+                          Accept
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="danger"
+                          className="me-2"
+                          onClick={() =>
+                            handleStatusChange(student.id, "rejected")
+                          }
+                        >
+                          Reject
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card.Body>
@@ -168,6 +215,16 @@ const AppliedStudentList = () => {
           </Col>
         )}
       </Row>
+
+      {/* Modal for Sending Interview Details */}
+      {selectedStudent && (
+        <InterviewDetailsModal
+          showModal={showModal}
+          handleCloseModal={handleCloseModal}
+          studentId={selectedStudent}
+          onEmailSent={() => handleEmailSent(selectedStudent.id)}
+        />
+      )}
     </Container>
   );
 };

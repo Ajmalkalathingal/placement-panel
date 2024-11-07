@@ -116,7 +116,7 @@ const SignUpRicuter = () => {
       </div>
 
       
-      <button onClick={RicuterSignUp}>wwwwww</button>
+      {/* <button onClick={RicuterSignUp}>wwwwww</button> */}
     </>
 }
 

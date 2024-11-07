@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,PasswordResetToken,JobApplication
+from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,PasswordResetToken,JobApplication,InterviewDetails
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,23 +8,23 @@ from django.http import JsonResponse
 
 # user creation and authentication serializers
 class UserSerializer(serializers.ModelSerializer):
-    student_id = serializers.CharField(write_only=True, required=False) 
+    registration_number = serializers.CharField(write_only=True, required=False) 
     coordinator_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'user_type', 'student_id','coordinator_id')
+        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'user_type', 'registration_number','coordinator_id')
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, attrs):
         email = attrs.get('email')
         user_type = attrs.get('user_type')
-        student_id = attrs.get('student_id')
+        registration_number = attrs.get('registration_number')
         coordinator_id = attrs.get('coordinator_id')
 
         if user_type == 'student':
             try:
-                student_registration = StudentRegistration.objects.get(student_id=student_id)
+                student_registration = StudentRegistration.objects.get(registration_number=registration_number)
                 if student_registration.is_registered:
                     raise ValidationError("This student has already registered.")
             except StudentRegistration.DoesNotExist:
@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        student_id = validated_data.pop('student_id',None)
+        registration_number = validated_data.pop('registration_number',None)
         coordinator_id = validated_data.pop('coordinator_id', None)
 
         # Create user
@@ -53,7 +53,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         if validated_data.get('user_type') == 'student':
-            student_registration = StudentRegistration.objects.get(student_id=student_id)
+            student_registration = StudentRegistration.objects.get(registration_number=registration_number)
             student_registration.is_registered = True 
             student_registration.save()
             StudentProfile.objects.create(
@@ -108,7 +108,7 @@ class RegistredStudentSerializer(serializers.ModelSerializer):
         fields = "__all__" 
 
         def validate_student_id(self, value):
-            if StudentRegistration.objects.filter(student_id=value).exists():
+            if StudentRegistration.objects.filter(registration_number=value).exists():
                 raise serializers.ValidationError("This student ID is already registered.")
             return value
 
@@ -194,7 +194,9 @@ class CoordinatorProfileSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
     recruiter = RecruiterProfileSerializer(read_only=True)
+    
     class Meta:
+        ordering = ['-id']
         model = Job
         fields = '__all__'        
         read_only_fields = ['recruiter']
@@ -214,9 +216,22 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     job = JobSerializer(read_only=True) 
 
     class Meta:
+        ordering = ['-id']
         model = JobApplication
-        fields = ['id', 'student', 'job', 'applied_on', 'status', 'is_seend']
+        fields = ['id', 'student', 'job', 'applied_on', 'status', 'is_seend','email_sent']
         read_only_fields = ['id', 'student', 'job', 'applied_on']
+
+
+class InterviewDetailsSerializer(serializers.ModelSerializer):
+    job_application_id = serializers.PrimaryKeyRelatedField(
+        queryset=JobApplication.objects.all(), source='job_application', write_only=True
+    )
+
+    class Meta:
+        model = InterviewDetails
+        fields = ['id', 'job_application_id', 'job_application', 'venue', 'time', 'other_details', 'created_at', 'updated_at', 'emailSent']
+        read_only_fields = ['created_at', 'updated_at', 'job_application']
+
 
 
 #--------------------------------- password rest ----------------------------------------#

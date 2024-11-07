@@ -30,9 +30,9 @@ function Signup() {
     setLoading(true);
 
     // Prepare the data to send
-    let student_id = registrationId;
+    let registration_number = registrationId;
     let data = {
-      student_id,
+      registration_number,
       email,
       password,
       first_name: name,
@@ -122,7 +122,7 @@ function Signup() {
       </div>
 
       
-      <button onClick={studentSignup}>wwwwww</button>
+      {/* <button onClick={studentSignup}>wwwwww</button> */}
     </>
   );
 }

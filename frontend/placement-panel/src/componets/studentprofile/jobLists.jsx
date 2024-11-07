@@ -13,7 +13,8 @@ const JobList = ({profile}) => {
     const fetchJobs = async () => {
       try {
         const response = await api.get('/api/jobs-lists/');
-        setJobs(response.data);
+        console.log(response)
+        setJobs(response.data.results);
       } catch (err) {
         setError('Failed to fetch jobs');
       } finally {
@@ -94,7 +95,9 @@ const JobList = ({profile}) => {
           </div>
         ))
       ) : (
-        <div>No jobs available</div>
+        <div className="col-12">
+        <p className="text-center ">No jobs list found.</p>
+      </div>
       )}
     </div>
   );
