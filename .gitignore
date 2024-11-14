@@ -1,6 +1,9 @@
 # ignore vendor static files
 src/staticfiles/vendors
 
+/assets/
+
+
 # ignore local static file root
 # or "local cdn"
 local-cdn/
