@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../api";
 import { toast } from "react-toastify";
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 
-const EditProfile = ({profile}) => {
+const EditProfile = ({updateProfile , profile}) => {
 
-    const [img, setProfileImage] = useState(null);
+    const [img, setProfileImage] = useState( null);
     const [resume, setResume] = useState(null);
     const [firstName, setFirstName] = useState(profile.user.first_name);
     const [lastName, setLastName] = useState(profile.user.last_name);
@@ -40,8 +40,7 @@ const EditProfile = ({profile}) => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-  
-            console.log('Profile updated successfully');
+            updateProfile(response.data);
             toast.success('Profile updated successfully')
         } catch (error) {
             if (error.response) {

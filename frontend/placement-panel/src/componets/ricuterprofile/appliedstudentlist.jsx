@@ -35,7 +35,7 @@ const AppliedStudentList = () => {
     };
 
     fetchAppliedStudents();
-  }, []);
+  }, [students]);
 
   const handleStatusChange = async (studentId, status) => {
     try {
@@ -167,8 +167,7 @@ const AppliedStudentList = () => {
                           <FontAwesomeIcon
                             icon={faPaperPlane}
                             className="me-2"
-                          />{" "}
-                          {/* Send Icon */}
+                          />
                           Send Interview Details
                         </Button>
                       ) : (

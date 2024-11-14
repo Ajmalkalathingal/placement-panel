@@ -10,7 +10,7 @@ const AppliedJobPost = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 25;
 
   const fetchApplications = async (page) => {
     setLoading(true);
@@ -30,15 +30,7 @@ const AppliedJobPost = () => {
     fetchApplications(currentPage);
   }, [currentPage]);
 
-  useEffect(() => {
-    // Trigger animation by adding 'show' class after data loads
-    if (!loading) {
-      const cards = document.querySelectorAll('.card');
-      cards.forEach((card, index) => {
-        setTimeout(() => card.classList.add('show'), index * 100);
-      });
-    }
-  }, [applications, loading]);
+
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -76,6 +68,7 @@ const AppliedJobPost = () => {
                       height={50}
                       alt={`${application.job.recruiter.company_name} logo`}
                       className="me-3 border"
+                      style={{borderRadius:'50%'}}
                     />
                     <div>
                       <h5 className="card-title mb-1">{application.job.recruiter.company_name}</h5>

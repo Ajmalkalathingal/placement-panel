@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../../api";
+import { toast } from "react-toastify";
 
 const CreateJobPost = (profile) => {
 
@@ -28,17 +29,17 @@ const CreateJobPost = (profile) => {
         const response = await api.post('/api/recruiters/create-job-post/', formData);
 
         if (response) {
-            alert('Job post created successfully!');
-            // setFormData({
-            //     recruiter:'',
-            //     title: '',
-            //     description: '',
-            //     location: '',
-            //     salary: '',
-            //     requirements: '',
-            //     deadline: '',
-            //     job_type: 'full-time',
-            // });
+            toast.success('Job post created successfully!');
+            setFormData({
+                recruiter:'',
+                title: '',
+                description: '',
+                location: '',
+                salary: '',
+                requirements: '',
+                deadline: '',
+                job_type: 'full-time',
+            });
         } else {
             alert('Error creating job post');
         }

@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../api";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faBook, faEnvelope, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import './rstyle.css';
+
 
 const Registration = () => {
   const [courses, setCourses] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [selectedFile, setSelectedFile] = useState(null);
 
   const [formData, setFormData] = useState({
     registration_number: '',
@@ -45,47 +44,23 @@ const Registration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess(''); 
-
+    setSuccess('');
+  
     try {
       const response = await api.post("api/register/", formData);
-      setSuccess('Registration successful!'); 
+      setSuccess('Registration successful!');
     } catch (error) {
       console.error("Error during registration:", error);
-      setError('Registration failed. Please try again.' + error);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
-
-  const handleSubmitPdf = async (e) => {
-    e.preventDefault();
-
-    if (!selectedFile) {
-      alert("Please select a file.");
-      return;
-    }
-
-    const uploadData = new FormData();
-    uploadData.append('file', selectedFile);
-
-    try {
-      const response = await api.post('/api/upload-student-data/', uploadData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      if (response.status === 200) {
-        alert('File uploaded successfully!');
+  
+      if (error.response && error.response.data) {
+        const errorMessages = Object.values(error.response.data);
+        setError(`Registration failed: ${errorMessages}`);
+      } else {
+        setError('Registration failed. Please try again.');
       }
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Failed to upload file.');
     }
   };
+  
 
   if (loading) {
     return <div>Loading...</div>; 
@@ -93,165 +68,149 @@ const Registration = () => {
 
   return (
     <>
-      <div className="card text-black" style={{ borderRadius: "25px" }}>
-        <div className="card-body p-md-5">
-          <div className="row justify-content-center">
-            <div className="col-md-8 col-lg-5 col-xl-4 order-2 order-lg-1">
-              <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
-                Registration
-              </p>
+<div className="card text-black" style={{ borderRadius: "25px" }}>
 
-              {error && <div className="alert alert-danger">{error}</div>} 
-              {success && <div className="alert alert-success">{success}</div>} 
+        <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
+          Registration
+        </p>
 
-              <form className="mx-1 mx-md-4" onSubmit={handleSubmit}>
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-                <div className="d-flex flex-row align-items-center mb-4">
-                  <FontAwesomeIcon icon={faUser} size="lg" className="me-3" />
-                  <div className="form-outline flex-fill mb-0">
-                    <input
-                      type="text"
-                      name="registration_number" 
-                      value={formData.registration_number}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                    />
-                    <label className="form-label">
-                      Registration Number
-                    </label>
-                  </div>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                  <FontAwesomeIcon icon={faUser} size="lg" className="me-3" />
-                  <div className="form-outline flex-fill mb-0">
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                    />
-                    <label className="form-label">
-                      Name
-                    </label>
-                  </div>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                  <FontAwesomeIcon icon={faBook} size="lg" className="me-3" />
-                  <div className="form-outline flex-fill mb-0">
-                    <select
-                      name="course" 
-                      value={formData.course}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                    >
-                      <option value="" disabled>
-                        Select Course
-                      </option>
-                      {courses.map((course) => (
-                        <option key={course.value} value={course.value}>
-                          {course.label}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="form-label">
-                      Course
-                    </label>
-                  </div>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                  <FontAwesomeIcon icon={faEnvelope} size="lg" className="me-3" />
-                  <div className="form-outline flex-fill mb-0">
-                    <input
-                      type="text"
-                      name="duration"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                    />
-                    <label className="form-label">
-                    duration
-                    </label>
-                  </div>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                  <FontAwesomeIcon icon={faCalendarAlt} size="lg" className="me-3" />
-                  <div className="form-outline flex-fill mb-0">
-                    <input
-                      type="date"
-                      name="starting_date"
-                      value={formData.starting_date}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                    />
-                    <label className="form-label">
-                      Starting Date
-                    </label>
-                  </div>
-                </div>
-
-                <div className="d-flex flex-row align-items-center mb-4">
-                  <FontAwesomeIcon icon={faCalendarAlt} size="lg" className="me-3" />
-                  <div className="form-outline flex-fill mb-0">
-                    <input
-                      type="date"
-                      name="ending_date"
-                      value={formData.ending_date}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                    />
-                    <label className="form-label">
-                      Ending Date
-                    </label>
-                  </div>
-                </div>
-
-                <div className="form-check d-flex justify-content-center mb-5">
-                  <input
-                    className="form-check-input me-2"
-                    type="checkbox"
-                    name="is_registered"
-                    checked={formData.is_registered}
-                    onChange={handleChange}
-                  />
-                  <label className="form-check-label">
-                    Registered
-                  </label>
-                </div>
-
-                <div className="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                  <button type="submit" className="btn btn-primary btn-lg">
-                    Register
-                  </button>
-                </div>
-              </form>
+        <form className="mx-1 mx-md-4" onSubmit={handleSubmit}>
+          {/* First Part: Registration Information */}
+          <div className="row">
+            <div className="col-md-6">
+              {/* Registration Number */}
+              <div className="form-group mb-4">
+                <label htmlFor="registration_number">Registration Number</label>
+                <input
+                  type="text"
+                  id="registration_number"
+                  name="registration_number"
+                  value={formData.registration_number}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="Registration Number"
+                  required
+                />
+              </div>
             </div>
-
-            <div className="col-md-10 col-lg-6 col-xl-5 d-flex align-items-center order-1 order-lg-2">
-              <img
-                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp"
-                className="img-fluid"
-                alt="Sample image"
-              />
+            <div className="col-md-6">
+              {/* Name */}
+              <div className="form-group mb-4">
+                <label htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="Name"
+                  required
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div>
-        <h2>Upload Student Data</h2>
-        <form onSubmit={handleSubmitPdf}>
-          <input type="file" accept=".xlsx" onChange={handleFileChange} />
-          <button type="submit">Upload</button>
+
+          {/* Second Part: Course and Dates */}
+          <div className="row">
+            <div className="col-md-6">
+              {/* Course */}
+              <div className="form-group mb-4">
+                <label htmlFor="course">Course</label>
+                <select
+                  id="course"
+                  name="course"
+                  value={formData.course}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                >
+                  <option value="" disabled>Select Course</option>
+                  {courses.map((course) => (
+                    <option key={course.value} value={course.value}>
+                      {course.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-6">
+              {/* Starting Date */}
+              <div className="form-group mb-4">
+                <label htmlFor="starting_date">Starting Date</label>
+                <input
+                  type="date"
+                  id="starting_date"
+                  name="starting_date"
+                  value={formData.starting_date}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Third Part: Duration and Ending Date */}
+          <div className="row">
+            <div className="col-md-6">
+              {/* Duration */}
+              <div className="form-group mb-4">
+                <label htmlFor="duration">Duration</label>
+                <input
+                  type="text"
+                  id="duration"
+                  name="duration"
+                  value={formData.duration}
+                  onChange={handleChange}
+                  className="form-control"
+                  placeholder="Duration"
+                  required
+                />
+              </div>
+            </div>
+            <div className="col-md-6">
+              {/* Ending Date */}
+              <div className="form-group mb-4">
+                <label htmlFor="ending_date">Ending Date</label>
+                <input
+                  type="date"
+                  id="ending_date"
+                  name="ending_date"
+                  value={formData.ending_date}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Fourth Part: Checkbox and Submit */}
+          {/* <div className="row">
+            <div className="col-md-6">
+              <div className="form-check d-flex justify-content-center mb-5">
+                <input
+                  className="form-check-input me-2"
+                  type="checkbox"
+                  name="is_registered"
+                  checked={formData.is_registered}
+                  onChange={handleChange}
+                />
+                <label className="form-check-label">Registered</label>
+              </div>
+            </div>
+          </div> */}
+
+          {/* Submit Button */}
+          <div className="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
+            <button type="submit" className="btn btn-primary btn-lg">
+              Register
+            </button>
+          </div>
         </form>
       </div>
     </>

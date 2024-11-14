@@ -20,7 +20,7 @@
   
   .content {
     padding: 20px;
-    background-color: #fff;
+    /* background-color: #fff; */
     flex-grow: 1;
   }
 
@@ -128,3 +128,34 @@
   margin-left: 250px; /* Add margin equal to sidebar width to avoid overlap */
   padding: 20px; /* Optional: add some padding for better spacing */
 }
+
+
+/* Adjust table cell padding */
+.table td, .table th {
+  padding: 8px; /* Reduce default padding */
+  vertical-align: middle;
+}
+
+/* Set a maximum width for specific columns to prevent large gaps */
+.table td:nth-child(1) { /* Name column */
+  width: 25%; /* Adjust percentage as needed */
+}
+
+.table td:nth-child(2) { /* Registration Number column */
+  width: 20%;
+}
+
+.table td:nth-child(3) { /* Status column */
+  width: 15%;
+}
+
+.table td:nth-child(4) { /* Duration column */
+  width: 20%;
+}
+
+.table td:nth-child(5) { /* Actions column */
+  width: 15%;
+}
+
+
+

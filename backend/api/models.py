@@ -201,6 +201,16 @@ class InterviewDetails(models.Model):
         return f"Interview for {self.job_application.job.title} at {self.venue} on {self.time}"
 
 
+class PlacementEvent(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    event_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')

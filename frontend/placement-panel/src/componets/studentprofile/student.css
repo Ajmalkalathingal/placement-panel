@@ -461,3 +461,6 @@ a{
     margin-right: 1.5rem!important;
 }
 
+.card img {
+    height: 5em;
+}

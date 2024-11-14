@@ -13,7 +13,6 @@ const JobList = ({profile}) => {
     const fetchJobs = async () => {
       try {
         const response = await api.get('/api/jobs-lists/');
-        console.log(response)
         setJobs(response.data.results);
       } catch (err) {
         setError('Failed to fetch jobs');
@@ -70,6 +69,14 @@ const JobList = ({profile}) => {
                     <h4 className="h5">{job.title}</h4>
                     <span className="badge bg-secondary m-2">Location: {job.location}</span>
                     <span className="badge bg-success">Salary: {job.salary}</span><br />
+                    <div className="mt-2">
+                      <p>requirements</p>
+                      {job.requirements.split(",").map((requirement, index) => (
+                        <span key={index} className="badge bg-warning m-1">
+                          {requirement.trim()}
+                        </span>
+                      ))}
+                    </div>
                     <strong><u>Description</u></strong>
                     <p>{job.description}</p>
                   </div>
@@ -80,7 +87,7 @@ const JobList = ({profile}) => {
                     <button 
                       onClick={() => applyForJob(job.id)} 
                       className="btn btn-primary stretched-link"
-                      disabled={appliedJobs.includes(job.id) || loadingJobId === job.id} // Disable if already applied or loading
+                      disabled={appliedJobs.includes(job.id) || loadingJobId === job.id} 
                     >
                       {loadingJobId === job.id ? (
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

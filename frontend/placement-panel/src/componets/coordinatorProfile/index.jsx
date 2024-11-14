@@ -7,6 +7,8 @@ import {
 import CDHome from './CDhome';
 import StuList from './StuList';
 import Registration from './registration';
+import UploadDataPDF from './UploadPDF';
+import PlacementEventForm from './events';
 
 const CoordinatorProfile = ({ profile }) => {
   const [activeSection, setActiveSection] = useState('home'); // Default to 'home'
@@ -45,15 +47,21 @@ const CoordinatorProfile = ({ profile }) => {
               </a>
             </li>
             <li>
-              <a href="#" className={`nav-link ${activeSection === 'products' ? 'active' : ''}`} onClick={() => handleSectionChange('products')}>
+              <a href="#" className={`nav-link ${activeSection === 'uploadStudentData' ? 'active' : ''}`} onClick={() => handleSectionChange('uploadStudentData')}>
                 <FontAwesomeIcon icon={faBox} className="me-2" />
-                Products
+                UploaData in PDF
               </a>
             </li>
             <li>
-              <a href="#" className={`nav-link ${activeSection === 'customers' ? 'active' : ''}`} onClick={() => handleSectionChange('customers')}>
+              <a href="#" className={`nav-link ${activeSection === 'placementevent' ? 'active' : ''}`} onClick={() => handleSectionChange('placementevent')}>
                 <FontAwesomeIcon icon={faUsers} className="me-2" />
-                Customers
+                Placement Events
+              </a>
+            </li>
+            <li>
+              <a href="#" className={`nav-link ${activeSection === 'logout' ? 'active' : ''}`} onClick={() => handleSectionChange('logout')}>
+                <FontAwesomeIcon icon={faUsers} className="me-2" />
+                Logout
               </a>
             </li>
           </ul>
@@ -89,8 +97,10 @@ const CoordinatorProfile = ({ profile }) => {
           {activeSection === 'home' && <CDHome />}
           {activeSection === 'dashboard' && <StuList />}
           {activeSection === 'registration' && <Registration/>}
-          {activeSection === 'products' && <h1>Products Section</h1>}
-          {activeSection === 'customers' && <h1>Customers Section</h1>}
+          {activeSection === 'uploadStudentData' && <UploadDataPDF/>}
+          {activeSection === 'placementevent' && <PlacementEventForm/>}
+          {/* {activeSection === 'logout' && <PlacementEventForm/>} */}
+          
         </div>
       </div>
     </div>

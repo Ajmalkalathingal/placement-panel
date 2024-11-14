@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
+    RegisterStudentView,
     CustomTokenObtainPairView,
     StudentSignupView,
     RecruiterSignupView,
@@ -33,6 +34,8 @@ from .views import (
     mark_applications_as_seen,
 
     InterviewDetailsCreateView,
+    InterviewDetailsListView,
+    create_placement_event,
 
     CourseChoicesView,
     RegisterStudentView,
@@ -90,6 +93,9 @@ urlpatterns = [
     path('recruiter/job-applications/<int:pk>/',UpdateApplicationStatusView.as_view(), name='update-application-status'),
 
     path('interview-details/<int:job_application_id>/', InterviewDetailsCreateView.as_view(), name='interview-details-create'),
+    path('interview-details-list/', InterviewDetailsListView.as_view(), name='interview-details-list'),
+
+    path('placement-events/', create_placement_event, name='create_placement_event'),
 
     # registration
     path('course-choices/', CourseChoicesView.as_view(), name='course-choices'),

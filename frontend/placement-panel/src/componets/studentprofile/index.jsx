@@ -6,25 +6,30 @@ import EditProfile from './EditProfile';
 import JobList from './jobLists';
 import AppliedJobPost from './appliedjobpost';
 import { getMenuItems } from '../../utils/menuItems';
+import InterviewDetails from './JobApplicaton';
 
 
 const StudentProfile = ({ profile }) => {
   const menuItems = getMenuItems('Student');
   const [activeSection, setActiveSection] = useState(menuItems[0].section);
   const [profiles, setProfile] = useState(profile);
+  const [imageUrl, setImageUrl] = useState(`${getImageUrl(profile.img)}?${Date.now()}`);
 
 
   // Function to handle section change
   const handleSectionChange = (section) => {
     setActiveSection(section);
   };
+  
+  const updateProfile = (updatedProfile) => {
+    // Generate a new URL with a timestamp to bypass caching
+    const newImageUrl = `${(updatedProfile.img)}?${Date.now()}`;
+    setProfile(updatedProfile);
+    setImageUrl(newImageUrl); 
+  };
 
-  useEffect(() => {
-    setProfile(profile);
-}, [profile]);
-
-console.log(profile)
-   const imageUrl = getImageUrl(profiles.img);
+  useEffect(() => {}, [profile]);
+  
   return (
     <div className="bootstrap snippets bootdey">
       <div className=" row">
@@ -35,9 +40,7 @@ console.log(profile)
               <img style={{ borderColor: '#ffff', borderWidth: '5px', borderStyle: 'solid' }} src={imageUrl || "https://bootdey.com/img/Content/avatar/avatar3.png"} />
             </a>
             <h1>{profiles.user.first_name} </h1>
-            <p>{profiles.user.email}</p>
           </div>
-
           <ul className="p-1 mt-2 ml-3 space text" style={{ listStyle: 'none' }}>
           {menuItems.map((item) => (
                 <li key={item.section} className={activeSection === item.section ? 'active' : ''}>
@@ -114,7 +117,8 @@ console.log(profile)
 
 
             {/* Update Profile Section */}
-            {activeSection === 'updateProfile' && (<EditProfile profile={profiles}/>)}
+            {activeSection === 'updateProfile' && <EditProfile updateProfile={updateProfile} profile={profile} />}
+            {activeSection === 'JobApplicaton' && <InterviewDetails />}
 
           </div>
         </div>

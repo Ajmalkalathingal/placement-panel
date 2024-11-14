@@ -24,7 +24,8 @@ from .serializers import (UserSerializer,
         PasswordResetRequestSerializer,
         PasswordResetSerializer,
         JobApplicationSerializer,
-        InterviewDetailsSerializer
+        InterviewDetailsSerializer,
+        PlacementEventSerializer
         )   
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
@@ -131,12 +132,12 @@ class RegisterStudentView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegistredStudentListView(generics.ListAPIView):
-    queryset = StudentRegistration.objects.all()  
+    queryset = StudentRegistration.objects.all().order_by('-id') 
     serializer_class = RegistredStudentSerializer
     permission_classes = [IsAuthenticated,IsCoordinator|IsVerifier] 
 
 class RegisteredStudentUpdateView(generics.UpdateAPIView):
-    queryset = StudentRegistration.objects.all()
+    queryset = StudentRegistration.objects.all().order_by('-id')
     serializer_class = RegistredStudentSerializer
     permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]
 
@@ -144,7 +145,7 @@ class RegisteredStudentUpdateView(generics.UpdateAPIView):
         serializer.save()
 
 class RegisteredStudentDeleteView(generics.DestroyAPIView):
-    queryset = StudentRegistration.objects.all()
+    queryset = StudentRegistration.objects.all().order_by('-id')
     serializer_class = RegistredStudentSerializer
     permission_classes = [IsAuthenticated, IsCoordinator | IsVerifier]        
  
@@ -408,7 +409,7 @@ class JobApplicationsForRecruiterView(generics.ListAPIView):
 
         # Check if the recruiter has jobs
         if not jobs.exists():
-            raise PermissionDenied("You do not have permission to view applications for your jobs.")
+            return
 
         return JobApplication.objects.filter(job__in=jobs)
 
@@ -494,6 +495,25 @@ class InterviewDetailsCreateView(generics.CreateAPIView):
         )
 
         send_interview_email_task.delay(recruiter_email, student_email, subject, message)
+
+
+class InterviewDetailsListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated,IsCoordinator | IsStudent]
+    serializer_class = InterviewDetailsSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return InterviewDetails.objects.filter(job_application__student__user=user, job_application__email_sent=True)
+    
+
+@api_view(['POST'])
+def create_placement_event(request):
+    if request.method == 'POST':
+        serializer = PlacementEventSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
 
 
 

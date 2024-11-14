@@ -1,6 +1,6 @@
 export const getImageUrl = (imagePath) => {
-    const baseUrl = "http://localhost:8000"; 
-    return imagePath ? `${baseUrl}${imagePath}` : '/path/to/default/image.jpg';
+    const baseUrl = "http://localhost:8000";
+    return imagePath ? `${baseUrl}${imagePath}?t=${new Date().getTime()}` : '/path/to/default/image.jpg';
 };
 
 

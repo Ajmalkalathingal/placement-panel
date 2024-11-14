@@ -53,6 +53,7 @@ function Signup() {
       if (error.response) {
         const errorData = error.response.data;
         toast.error("Registration failed: " + JSON.stringify(errorData));
+        console.log("Registration failed: " + JSON.stringify(errorData));
       } else if (error.request) {
         toast.error("No response from the server. Please try again later.");
       } else {

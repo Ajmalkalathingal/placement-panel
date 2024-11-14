@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,PasswordResetToken,JobApplication,InterviewDetails
+from .models import User,StudentProfile,CoordinatorProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorRegistration,PasswordResetToken,JobApplication,InterviewDetails,PlacementEvent
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.http import JsonResponse
 
 
 # user creation and authentication serializers
@@ -102,20 +101,20 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
         }
     # -------------------------------------------------------------------------------------------------#
 class RegistredStudentSerializer(serializers.ModelSerializer):
-    
     class Meta:
+        ordering = ['id']
         model = StudentRegistration
-        fields = "__all__" 
+        fields = "__all__"
 
-        def validate_student_id(self, value):
+    def validate_registration_number(self, value):
+        if self.instance:
+            # Exclude the current instance from the validation check
+            if StudentRegistration.objects.filter(registration_number=value).exclude(id=self.instance.id).exists():
+                raise serializers.ValidationError("This student ID is already registered.")
+        else:
             if StudentRegistration.objects.filter(registration_number=value).exists():
                 raise serializers.ValidationError("This student ID is already registered.")
-            return value
-
-        def validate_email(self, value):
-            if StudentRegistration.objects.filter(email=value).exists():
-                raise serializers.ValidationError("This email is already registered.")
-            return value    
+        return value
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
@@ -226,6 +225,7 @@ class InterviewDetailsSerializer(serializers.ModelSerializer):
     job_application_id = serializers.PrimaryKeyRelatedField(
         queryset=JobApplication.objects.all(), source='job_application', write_only=True
     )
+    job_application = JobApplicationSerializer(read_only=True) 
 
     class Meta:
         model = InterviewDetails
@@ -233,7 +233,11 @@ class InterviewDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at', 'job_application']
 
 
-
+class PlacementEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlacementEvent
+        fields = ['title', 'description', 'event_date', 'is_active']
+        
 #--------------------------------- password rest ----------------------------------------#
 from django.core.mail import send_mail
 
