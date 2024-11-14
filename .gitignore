@@ -2,6 +2,9 @@
 src/staticfiles/vendors
 
 /assets/
+/assets/
+frontend/placement-panel/src/assets/
+
 
 
 # ignore local static file root
