@@ -1,100 +1,100 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Image, Badge, Spinner } from 'react-bootstrap';
+import { Card, Row, Col, Image, Badge, Spinner, Container } from 'react-bootstrap';
 import api from '../../api';
+import "./student.css";
+
 
 const InterviewDetails = () => {
   const [interviews, setInterviews] = useState([]);
-  const [loading, setLoading] = useState(true); // Track loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function getInterviewDetails() {
       try {
         const response = await api.get('api/interview-details-list/');
-        console.log(response);
         if (response) {
           setInterviews(response.data.results);
         }
       } catch (error) {
         console.log(error);
       } finally {
-        setLoading(false); // Set loading to false after the API request is done
+        setLoading(false);
       }
     }
     getInterviewDetails();
   }, []);
 
   return (
-    <Row>
+    <Container className="py-4">
+      <h2 className="text-center mb-4">Interview Details</h2>
       {loading ? (
-        // Show loading spinner while data is being fetched
-        <Col className="text-center">
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
           <Spinner animation="border" variant="primary" />
-        </Col>
+        </div>
       ) : interviews.length > 0 ? (
-        // Display interviews once data is loaded
-        interviews.map((interview) => {
-          const { id, venue, time, emailSent, job_application } = interview;
-          const { job, status, applied_on, student } = job_application;
-          const { title, recruiter, location, salary, job_type } = job || {};
-          const formattedTime = new Date(time).toLocaleString();
-          const appliedDate = new Date(applied_on).toLocaleDateString();
+        <Row className="g-3" style={{ fontSize: '1.2rem' }}>
+          {interviews.map((interview) => {
+            const { id, venue, time, emailSent, job_application } = interview;
+            const { job, status, applied_on, student } = job_application;
+            const { title, recruiter, location, salary, job_type } = job || {};
+            const formattedTime = new Date(time).toLocaleString();
+            const appliedDate = new Date(applied_on).toLocaleDateString();
 
-          return (
-            <Col key={id} md={6} lg={4} className="mb-4">
-              <Card className="shadow-sm border h-100 rounded-3 mt-4">
-                <Card.Body>
-                  <div className="d-flex align-items-center mb-3">
-                    <Image
-                      src={recruiter?.company_logo || "https://via.placeholder.com/50"}
-                      roundedCircle
-                      width={50}
-                      height={50}
-                      alt={`${recruiter?.company_name} logo`}
-                      className="me-3 border"
-                    />
-                    <div>
-                      <h5 className="card-title mb-1">{recruiter?.company_name}</h5>
-                      <small className="text-muted">
-                        {location} | {job_type}
-                      </small>
+            return (
+              <Col key={id} md={6} lg={4}>
+                <Card className="shadow-sm border-0 h-100 rounded-4 hover-card">
+                  <Card.Body className="p-4">
+                    <div className="d-flex align-items-center mb-3">
+                      <Image
+                        src={recruiter?.company_logo || "https://via.placeholder.com/50"}
+                        roundedCircle
+                        width={50}
+                        height={50}
+                        alt={`${recruiter?.company_name || "Company"} logo`}
+                        className="me-3 border border-2"
+                      />
+                      <div>
+                        <h5 className="mb-1 text-truncate">{recruiter?.company_name || "Unknown Company"}</h5>
+                        <small className="text-muted">
+                          {location || "Location Unavailable"} | {job_type || "Job Type N/A"}
+                        </small>
+                      </div>
                     </div>
-                  </div>
-                  <p className="mb-1">
-                    <strong>Job Title:</strong> {title}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Interview Venue:</strong> {venue}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Interview Time:</strong> {formattedTime}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Salary:</strong> ${salary}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Applied On:</strong> {appliedDate}
-                  </p>
-                  <div className="mt-3">
-                    <Badge
-                      bg={status === "reviewed" ? "secondary" : "primary"}
-                      className="p-2"
-                    >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </Badge>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          );
-        })
+                    <p className="mb-2">
+                      <strong>Job Title:</strong> {title || "N/A"}
+                    </p>
+                    <p className="mb-2">
+                      <strong>Venue:</strong> {venue || "N/A"}
+                    </p>
+                    <p className="mb-2">
+                      <strong>Time:</strong> {formattedTime}
+                    </p>
+                    <p className="mb-2">
+                      <strong>Salary:</strong> ${salary || "N/A"}
+                    </p>
+                    <p className="mb-2">
+                      <strong>Applied On:</strong> {appliedDate}
+                    </p>
+                    <div className="mt-3">
+                      <Badge
+                        bg={status === "reviewed" ? "info" : status === "scheduled" ? "success" : "warning"}
+                        className="p-2 rounded-pill"
+                      >
+                        {status ? status.charAt(0).toUpperCase() + status.slice(1) : "Status Unavailable"}
+                      </Badge>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            );
+          })}
+        </Row>
       ) : (
-        <Col className="text-center">
-          <p className="text-muted">
-            No interview details available.
-          </p>
-        </Col>
+        <div className="text-center mt-5">
+          <p className="text-muted fs-5">No interview details available.</p>
+        </div>
       )}
-    </Row>
+    </Container>
   );
 };
 

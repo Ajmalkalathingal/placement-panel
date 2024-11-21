@@ -3,6 +3,7 @@ import api from "../../api";
 import StudentRow from "./studentRow";
 import Modal from "./modal";
 import PaginationComponent from "../pagination/Pagination";
+import { toast } from "react-toastify";
 
 const StuList = () => {
   const [students, setStudents] = useState([]);
@@ -34,8 +35,7 @@ const StuList = () => {
   console.log(updatedData,'updated data')
     try {
       const response = await api.put(`/api/student-list/${selectedStudent.id}/`, updatedData);
-      console.log(response);
-
+      toast.success(' stuent data updated ')
       // Update the students list
       setStudents((prevStudents) =>
         prevStudents.map((student) =>

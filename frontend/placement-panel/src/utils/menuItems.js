@@ -2,16 +2,14 @@ import {
     faUser,
     faCalendar,
     faBriefcase,
-    faBook,
-    faInbox,
     faEdit,
     faSignOutAlt,
-    faTachometerAlt,
     faTable,
     faBox,
     faUsers,
+    faCheckCircle,
     faHome,
-    faCheckCircle
+    faTachometerAlt,
   } from '@fortawesome/free-solid-svg-icons';
   
   export const getMenuItems = (role) => {
@@ -19,12 +17,13 @@ import {
       case 'Coordinator':
         return [
           { section: 'home', label: 'Home', icon: faHome },
-          { section: 'studentList', label: 'Student List', icon: faUsers },
-          { section: 'registration', label: 'Registration', icon: faTable },
-          { section: 'products', label: 'Products', icon: faBox },
-          { section: 'customers', label: 'Customers', icon: faUsers },
+          { section: 'dashboard', label: 'dashboard', icon: faTachometerAlt },
+          { section: 'registration', label: 'Registration', icon: faTachometerAlt },
+          { section: 'uploadStudentData', label: 'uploadStudentData', icon: faTable },
+          { section: 'placementevent', label: 'placementevent', icon: faBox },
           { section: 'logout', label: 'Logout', icon: faSignOutAlt },
         ];
+
       case 'Recruiter':
         return [
           { section: 'profile', label: 'Profile', icon: faUser },
@@ -36,8 +35,9 @@ import {
         ];
       case 'Verifier':
         return [
-          { section: 'profile', label: 'Profile', icon: faUser },
-          { section: 'verifyPosts', label: 'Verify Posts', icon: faCheckCircle },
+          { section: 'home', label: 'Profile', icon: faUser },
+          { section: 'verify recruter', label: 'verify recruter', icon: faCheckCircle },
+          { section: 'create cordinators', label: 'create cordinators', icon: faCheckCircle },
           { section: 'logout', label: 'Logout', icon: faSignOutAlt },
         ];
       case 'Student':

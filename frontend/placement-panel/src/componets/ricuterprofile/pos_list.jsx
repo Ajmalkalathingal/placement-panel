@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import api from '../../api';
 import RModal from './modal';
+import { toast } from 'react-toastify';
 
 const PostList = () => {
     const [jobs, setJobs] = useState([]);
@@ -29,11 +30,11 @@ const PostList = () => {
         if (confirmDelete) {
             try {
                 await api.delete(`/api/jobs/${id}/delete/`);
-                setJobs(jobs.filter(job => job.id !== id));  // Remove deleted job from state
-                alert("Job deleted successfully.");
+                setJobs(jobs.filter(job => job.id !== id));  
+                toast.warn("Job deleted successfully.");
             } catch (error) {
                 console.error("Error deleting job:", error);
-                alert("Failed to delete the job.");
+                toast.warn("Failed to delete the job.");
             }
         }
     };
@@ -41,6 +42,7 @@ const PostList = () => {
     const updateJob = async (id, jobData) => {
         try {
             await api.put(`/api/jobs/${id}/update/`, jobData);
+            toast.success('update post successfully')
             fetchJobs();  
         } catch (error) {
             console.error("Error updating job:", error);

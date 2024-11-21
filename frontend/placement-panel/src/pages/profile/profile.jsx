@@ -10,6 +10,7 @@ import RicruterRegistrationForm from "../../componets/ricuterprofile/Rregistrati
 import RecruterProfile from "../../componets/ricuterprofile";
 import { setTokenCookies } from "../../utils/cookies";
 import TokenExpired from "../../componets/tokenExpire/TokenExpire";
+import Verifier from "../../componets/verifier";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -38,6 +39,8 @@ function Profile() {
                     profileUrl = '/api/coordinators/profile/';
                 } else if (userType === 'recruiter') {
                     profileUrl = '/api/recruiters/profile/';
+                } else if (userType === 'verifier') {
+                    profileUrl = '/api/verifier/profile/';
                 }
 
                 const response = await api.get(profileUrl);
@@ -101,6 +104,7 @@ function Profile() {
                     )}
                 </>
             )}
+            {userType === 'verifier' && <Verifier profile={profile}/>}
         </div>
     );
 }

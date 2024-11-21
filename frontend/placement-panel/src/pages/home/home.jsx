@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import Nav from "../../componets/nav"
 import './style.css';
 import { useEffect, useState } from "react";
 import { faUserGraduate, faBriefcase, faChalkboardTeacher, faUsersCog,faFilePdf  } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Verifier from "../../componets/verifier";
+import Header from "../../componets/header";
 
 
 
@@ -74,7 +75,7 @@ const Home = () => {
   return (
     <>
 <div className="container">
-  <Nav />
+  <Header />
 </div>
 
 <div className="hero my-5 position-relative">
@@ -366,7 +367,6 @@ const Home = () => {
       </div>
     </footer>
 </div>
-
     </>
   );
 };

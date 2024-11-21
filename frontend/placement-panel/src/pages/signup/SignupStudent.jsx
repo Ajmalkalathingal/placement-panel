@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import Input from "../../componets/input/input";
 import "./style.css";
@@ -21,7 +19,6 @@ function Signup() {
   const studentSignup = async (e) => {
     e.preventDefault();
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
@@ -29,10 +26,8 @@ function Signup() {
 
     setLoading(true);
 
-    // Prepare the data to send
-    let registration_number = registrationId;
     let data = {
-      registration_number,
+      registration_number: registrationId,
       email,
       password,
       first_name: name,
@@ -40,24 +35,20 @@ function Signup() {
       user_type: "student",
     };
 
-    // console.log(data);
-
     try {
       const response = await api.post("/api/signup/student/", data);
-
-      console.log(response.data);
       toast.success("Registration successful!");
-
       navigate("/login");
     } catch (error) {
       if (error.response) {
         const errorData = error.response.data;
-        toast.error("Registration failed: " + JSON.stringify(errorData));
-        console.log("Registration failed: " + JSON.stringify(errorData));
+
+        for (const [field, messages] of Object.entries(errorData)) {
+          messages.forEach((message) => toast.error(`${field}: ${message}`));
+        }
       } else if (error.request) {
         toast.error("No response from the server. Please try again later.");
       } else {
-        console.error("Error", error.message);
         toast.error("Network error or registration failed!");
       }
     } finally {
@@ -67,7 +58,7 @@ function Signup() {
 
   return (
     <>
-        <div className="wrapper">
+      <div className="wrapper">
         <div className="signup-wrapper">
           <h2 className="title">
             Sign up on <span style={{ color: "#2970ff" }}>Student</span>
@@ -113,7 +104,8 @@ function Signup() {
               text={loading ? "Loading" : "Sign up "}
               onClick={studentSignup}
             />
-            <Link to={'/login'}
+            <Link
+              to={"/login"}
               style={{ textAlign: "center", cursor: "pointer" }}
             >
               Already have an account? Click here to login.
@@ -122,11 +114,9 @@ function Signup() {
         </div>
       </div>
 
-      
       {/* <button onClick={studentSignup}>wwwwww</button> */}
     </>
   );
 }
 
 export default Signup;
-

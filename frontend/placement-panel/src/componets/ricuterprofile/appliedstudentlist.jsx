@@ -81,7 +81,6 @@ const AppliedStudentList = () => {
   if (error) {
     return <p className="text-center text-danger">{error}</p>;
   }
-  console.log(students);
   return (
     <Container className="mt-5">
       <h2 className="text-primary mb-4 text-center">

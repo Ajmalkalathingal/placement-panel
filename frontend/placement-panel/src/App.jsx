@@ -15,6 +15,7 @@ import SignUpRicuter from './pages/signup/SignUpReicrutor';
 import SignupCoordinator from './pages/signup/signUpCoordinator';
 import ResetPassword from './pages/resetPassword/resetPassword';
 import RequestPasswordReset from './pages/requestresetpassword/RequestPasswordReset ';
+import Index from './pages/home';
 
 function App() {
   
@@ -24,7 +25,7 @@ function App() {
       <div className="">
         <ToastContainer/>
         <Routes>
-        <Route path="/" element={<Home/>} />
+        <Route path="/" element={<Index/>} />
         <Route path="/signup-for-student" element={<Signup />} />
         <Route path="/signup-for-recruiter" element={<SignUpRicuter />} />
         <Route path="/signup-for-coordinator" element={<SignupCoordinator />} />

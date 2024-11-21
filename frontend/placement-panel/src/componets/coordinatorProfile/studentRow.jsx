@@ -1,7 +1,7 @@
-import { Modal } from "bootstrap/dist/js/bootstrap.bundle.min";
-import React, { useState } from "react";
+import  Modal  from "./modal";
 
-const StudentRow = ({ student,onEdit  }) => {
+
+const StudentRow = ({ student,onEdit }) => {
 
   return (
     <>
@@ -38,7 +38,6 @@ const StudentRow = ({ student,onEdit  }) => {
         </button>
       </td>
     </tr>
-    {/* <Modal show={isModalOpen} onClose={handleCloseModal} /> */}
     </>
     
   );

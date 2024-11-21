@@ -50,9 +50,16 @@ const RecruterProfile = ({ profile }) => {
   return (
     <>
       <div className=" mt-3">
+        
         <div className="bio-graph-heading">
-          Aliquam ac magna metus. Nam sed arcu non tellus fringilla fringilla ut
-          vel ispum.
+        <img
+          src={'src/assets/images/logo2.png'}
+          alt="University Logo"
+          width="40"
+          height="40"
+          className="me-2 ml-4"
+        />
+          Welcome to  calicut univercity Dcms Placement cell.
         </div>
         <div className="main-body">
           <div className="row">

@@ -51,7 +51,10 @@ function SignupCoordinator() {
     } catch (error) {
       if (error.response) {
         const errorData = error.response.data;
-        toast.error("Registration failed: " + JSON.stringify(errorData));
+
+        for (const [field, messages] of Object.entries(errorData)) {
+          messages.forEach((message) => toast.error(`${field}: ${message}`));
+        }
       } else if (error.request) {
         toast.error("No response from the server. Please try again later.");
       } else {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../../api";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 const UploadDataPDF = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -21,19 +21,19 @@ const UploadDataPDF = () => {
     setLoading(true);
 
     const uploadData = new FormData();
-    uploadData.append('file', selectedFile);
+    uploadData.append("file", selectedFile);
 
     try {
-      const response = await api.post('/api/upload-student-data/', uploadData, {
+      const response = await api.post("/api/upload-student-data/", uploadData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
       if (response.status === 200) {
         toast.success("File uploaded successfully!");
-        setSelectedFile(null);  
-        document.getElementById("fileInput").value = ''; 
+        setSelectedFile(null);
+        document.getElementById("fileInput").value = "";
       }
     } catch (error) {
       console.error("Error uploading file:", error);

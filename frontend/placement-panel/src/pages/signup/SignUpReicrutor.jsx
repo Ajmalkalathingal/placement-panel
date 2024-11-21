@@ -6,9 +6,7 @@ import { toast } from "react-toastify";
 import api from "../../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constant";
 
-
 const SignUpRicuter = () => {
-   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +14,7 @@ const SignUpRicuter = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Signup function for student
+  // Signup function for Ricuter
   const RicuterSignUp = async (e) => {
     e.preventDefault();
 
@@ -27,11 +25,6 @@ const SignUpRicuter = () => {
     }
 
     setLoading(true);
-
-    localStorage.removeItem(ACCESS_TOKEN);
-    localStorage.removeItem(REFRESH_TOKEN);
-    localStorage.removeItem('userType');
-    localStorage.removeItem('username');
 
     let data = {
       email,
@@ -53,7 +46,10 @@ const SignUpRicuter = () => {
     } catch (error) {
       if (error.response) {
         const errorData = error.response.data;
-        toast.error("Registration failed: " + JSON.stringify(errorData));
+
+        for (const [field, messages] of Object.entries(errorData)) {
+          messages.forEach((message) => toast.error(`${field}: ${message}`));
+        }
       } else if (error.request) {
         toast.error("No response from the server. Please try again later.");
       } else {
@@ -65,14 +61,14 @@ const SignUpRicuter = () => {
     }
   };
 
-  return <>
-        <div className="wrapper">
+  return (
+    <>
+      <div className="wrapper">
         <div className="signup-wrapper">
           <h2 className="title">
             Sign up on <span style={{ color: "#2970ff" }}>recruiter</span>
           </h2>
           <form onSubmit={RicuterSignUp}>
-
             <Input
               label="Full Name"
               type="text"
@@ -106,7 +102,8 @@ const SignUpRicuter = () => {
               text={loading ? "Loading" : "Sign up "}
               onClick={RicuterSignUp}
             />
-            <Link to={'/login'}
+            <Link
+              to={"/login"}
               style={{ textAlign: "center", cursor: "pointer" }}
             >
               Already have an account? Click here to login.
@@ -115,9 +112,9 @@ const SignUpRicuter = () => {
         </div>
       </div>
 
-      
       {/* <button onClick={RicuterSignUp}>wwwwww</button> */}
     </>
-}
+  );
+};
 
-export default SignUpRicuter
+export default SignUpRicuter;

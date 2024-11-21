@@ -7,12 +7,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 # user creation and authentication serializers
 class UserSerializer(serializers.ModelSerializer):
-    registration_number = serializers.CharField(write_only=True, required=False) 
+    registration_number = serializers.CharField(write_only=True, required=False)
     coordinator_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'password', 'user_type', 'registration_number','coordinator_id')
+        fields = (
+            'id', 'email', 'first_name', 'last_name', 'password', 'user_type', 
+            'registration_number', 'coordinator_id'
+        )
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, attrs):
@@ -21,29 +24,34 @@ class UserSerializer(serializers.ModelSerializer):
         registration_number = attrs.get('registration_number')
         coordinator_id = attrs.get('coordinator_id')
 
+        if User.objects.filter(email=email).exists():
+            raise ValidationError({'email': 'This email is already in use.'})
+
         if user_type == 'student':
+            if not registration_number:
+                raise ValidationError({'registration_number': 'Registration ID is required for students.'})
             try:
                 student_registration = StudentRegistration.objects.get(registration_number=registration_number)
                 if student_registration.is_registered:
-                    raise ValidationError("This student has already registered.")
+                    raise ValidationError({'registration_number': 'This student has already registered.'})
             except StudentRegistration.DoesNotExist:
-                raise ValidationError("This student ID is not pre-registered.")
-            
-        # Validate for coordinators
+                raise ValidationError({'registration_number': 'This registration ID is not pre-registered.'})
+
         elif user_type == 'coordinator':
+            if not coordinator_id:
+                raise ValidationError({'coordinator_id': 'Coordinator ID is required.'})
             try:
-                Coordinator_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
-                if Coordinator_registration.is_registered:
-                    raise ValidationError("This coordinator has already registered.")
+                coordinator_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
+                if coordinator_registration.is_registered:
+                    raise ValidationError({'coordinator_id': 'This coordinator has already registered.'})
             except CoordinatorRegistration.DoesNotExist:
-                raise ValidationError("This coordinator ID and email combination is not pre-registered.")
-    
+                raise ValidationError({'coordinator_id': 'This coordinator ID is not pre-registered.'})
+
         return attrs
-    
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        registration_number = validated_data.pop('registration_number',None)
+        registration_number = validated_data.pop('registration_number', None)
         coordinator_id = validated_data.pop('coordinator_id', None)
 
         # Create user
@@ -53,7 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         if validated_data.get('user_type') == 'student':
             student_registration = StudentRegistration.objects.get(registration_number=registration_number)
-            student_registration.is_registered = True 
+            student_registration.is_registered = True
             student_registration.save()
             StudentProfile.objects.create(
                 user=user,
@@ -63,18 +71,15 @@ class UserSerializer(serializers.ModelSerializer):
         elif validated_data.get('user_type') == 'coordinator':
             coordinator_registration = CoordinatorRegistration.objects.get(coordinator_id=coordinator_id)
             coordinator_registration.is_registered = True
-            coordinator_registration.user = user  
+            coordinator_registration.user = user
             coordinator_registration.save()
             CoordinatorProfile.objects.create(
                 user=user,
                 registration=coordinator_registration
             )
 
-        # elif user.user_type == 'recruiter':
-        #     RecruiterProfile.objects.create(
-        #         user=user,
-        #     )
         return user
+
     
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
@@ -153,7 +158,7 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecruiterProfile
-        fields = ['id', 'company_name', 'position', 'contact_number', 'company_logo','user']
+        fields = ['id', 'company_name', 'position', 'contact_number', 'company_logo','user','is_active']
 
     def create(self, validated_data):
         # The user is already set in the context

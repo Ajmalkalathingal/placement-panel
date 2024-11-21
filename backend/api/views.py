@@ -8,7 +8,7 @@ import pandas as pd
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .tasks import send_application_notification,send_interview_email_task
-from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication,InterviewDetails
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication,InterviewDetails,User
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
@@ -217,7 +217,7 @@ class StudentProfileDeleteView(generics.DestroyAPIView):
 
 # Recruiter 
 class RecruiterListView(generics.ListAPIView):
-    queryset = RecruiterProfile.objects.all()  
+    queryset = RecruiterProfile.objects.all().order_by('-id')  
     serializer_class = RecruiterProfileSerializer
     permission_classes = [IsAuthenticated]
 
@@ -247,7 +247,7 @@ class RecruterRegisterView(APIView):
                 serializer.save()  # Save the profile
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-      
+        
 
 class RecruiterProfileView(APIView):
     permission_classes = [IsAuthenticated]  
@@ -518,7 +518,7 @@ def create_placement_event(request):
 
 
 class CordinatorProfileView(APIView):
-    permission_classes = [IsAuthenticated] 
+    permission_classes = [IsAuthenticated, IsVerifier|IsCoordinator] 
     def get(self, request):
         try:
             user = request.user
@@ -526,9 +526,49 @@ class CordinatorProfileView(APIView):
             serializer = CoordinatorProfileSerializer(coordinator_profile)
             return Response(serializer.data)
         except CoordinatorProfile.DoesNotExist:
-            return Response({"error": "Student profile not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "coordinator profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# verifier section # 
+
+class VerifierProfileView(APIView):
+    permission_classes = [IsAuthenticated, IsVerifier]
+
+    def get(self, request):
+        try:
+            user = request.user
+            serializer = UserSerializer(user)
+            return Response({"user": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class VerifyRecruiterView(APIView):
+    permission_classes = [IsVerifier]  
+
+    def post(self, request, recruiter_id):
+        try:
+            recruiter = RecruiterProfile.objects.get(id=recruiter_id)
+            new_status = request.data.get('is_active')
+
+            if new_status is None:
+                return Response({"error": "is_active field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            recruiter.is_active = new_status
+            recruiter.save()
+
+            if new_status:
+                return Response({"message": "Recruiter verified successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Recruiter rejected successfully"}, status=status.HTTP_200_OK)
+
+        except RecruiterProfile.DoesNotExist:
+            return Response({"error": "Recruiter not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
 
 
 # exel upload for registration
