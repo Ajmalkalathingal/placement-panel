@@ -51,6 +51,7 @@ def send_verification_email(recruiter_id):
                 'from@example.com',
                 verifiers,
                 fail_silently=False,
+                
             )
 
     except RecruiterProfile.DoesNotExist:

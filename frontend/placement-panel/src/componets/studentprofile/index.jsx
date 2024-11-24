@@ -56,7 +56,14 @@ const StudentProfile = ({ profile }) => {
         <div className="profile-info col-md-10">
           <div className="panel">
             <div className="bio-graph-heading">
-              Aliquam ac magna metus. Nam sed arcu non tellus fringilla fringilla ut vel ispum.
+            <img
+          src={'src/assets/images/logo2.png'}
+          alt="University Logo"
+          width="40"
+          height="40"
+          className="me-2 ml-4"
+        />
+              Wlcome to DCMS placeemnt cell 
             </div>
 
             {/* Render different sections based on activeSection */}

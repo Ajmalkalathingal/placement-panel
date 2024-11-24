@@ -47,19 +47,47 @@ const RecruterProfile = ({ profile }) => {
 
   const imageUrl = getImageUrl(profiles.company_logo);
 
+ if (!profiles.is_active) {
+  return (
+    <div className="container mt-5">
+      <div className="card text-center shadow-sm">
+        <div className="card-body">
+          <div className="mb-4">
+            <img
+              src="https://img.icons8.com/ios-filled/100/000000/verification.png"
+              alt="Verification Icon"
+              style={{ opacity: 0.8 }}
+            />
+          </div>
+          <h5 className="card-title">Profile Verification in Progress</h5>
+          <p className="card-text text-secondary">
+            Please wait a moment while our team verifies your profile. Once
+            verified, it will be activated, and you can access all the features.
+          </p>
+          <div className="mt-3">
+            <button className="btn btn-primary" disabled>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Verifying...
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
   return (
     <>
       <div className=" mt-3">
-        
         <div className="bio-graph-heading">
-        <img
-          src={'src/assets/images/logo2.png'}
-          alt="University Logo"
-          width="40"
-          height="40"
-          className="me-2 ml-4"
-        />
-          Welcome to  calicut univercity Dcms Placement cell.
+          <img
+            src={"src/assets/images/logo2.png"}
+            alt="University Logo"
+            width="40"
+            height="40"
+            className="me-2 ml-4"
+          />
+          Welcome to calicut univercity Dcms Placement cell.
         </div>
         <div className="main-body">
           <div className="row">
@@ -124,7 +152,7 @@ const RecruterProfile = ({ profile }) => {
 
             <div className="col-lg-9">
               {/* Dynamically render sections based on activeSection */}
-              {activeSection === "profile" && <RHome profile={profiles} />}
+              {activeSection === "profile" && <RHome profile={profile} />}
               {activeSection === "CreateJobpost" && (
                 <CreateJobPost profile={profiles} />
               )}

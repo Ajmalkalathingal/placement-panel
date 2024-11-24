@@ -29,24 +29,26 @@
 
 FROM python:3.11.3-alpine
 
-# Install necessary system packages
-RUN apk add --no-cache bash build-base postgresql-dev libffi-dev zlib-dev jpeg-dev
+# Add necessary packages
+RUN apk add --no-cache bash
+
+# Add non-root user 'celery'
+RUN addgroup -S celery && adduser -S celery -G celery
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
+# Copy the project files
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port
-EXPOSE 8000
+# Change ownership of project files to the celery user
+RUN chown -R celery:celery /usr/src/app
 
-# Run the application
-CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Switch to non-root user
+USER celery
+
+# Define the default command (this can be overridden by Docker Compose)
+CMD ["celery", "-A", "project", "worker", "--loglevel=info"]

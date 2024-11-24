@@ -51,19 +51,13 @@ function RicruterRegistrationForm({onSubmit}) {
       <div className="col-md-3 register-left">
         <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt=""/>
         <h3>Welcome</h3>
-        <p>You are 30 seconds away from earning your own money!</p>
-        <input type="submit" name="" value="Login"/><br/>
+        <p>Calicut university DCMS placeemnt cell</p>
       </div>
       <div className="col-md-9 register-right">
-        <ul className="nav nav-tabs nav-justified" id="myTab" role="tablist">
-          <li className="nav-item">
-            <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Hirer</a>
-          </li>
-        </ul>
         <div className="tab-content" id="myTabContent ">
           {/* Employee Form */}
           <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            <h3 className="register-heading">Apply as an Employee</h3>
+            <h3 className="register-heading">Apply as Recruter</h3>
             <div className="row register-form">
               <div className="col-md-6">
                 

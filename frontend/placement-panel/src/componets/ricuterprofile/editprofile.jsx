@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import api from '../../api';
 import { getImageUrl } from '../../utils/utils';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const EditProfile = ({ profile,handleSectionChange,setProfile }) => {
   const navigate = useNavigate();
@@ -16,7 +17,6 @@ const EditProfile = ({ profile,handleSectionChange,setProfile }) => {
     contactNumber: profile.contact_number || '',
     company_logo: image || null, 
   });
-console.log(formData.company_logo)
   // Handle input change
   
   const handleChange = (e) => {
@@ -44,7 +44,7 @@ console.log(formData.company_logo)
     form.append('company_name', formData.companyName);
     form.append('position', formData.position);
     form.append('contact_number', formData.contactNumber);
-    form.append('is_active', formData.isActive);
+    // form.append('is_active', formData.isActive);
 
     if (formData.company_logo && formData.company_logo instanceof File) {
       form.append('company_logo', formData.company_logo); 
@@ -56,12 +56,12 @@ console.log(formData.company_logo)
           'Content-Type': 'multipart/form-data',
         },
       });
+      console.log(response)
       setProfile(response.data);
 
-    console.log('after update',profile)
+    toast.success('profile update')
       handleSectionChange('profile')
     } catch (error) {
-      console.error('Error updating profile:', error);
     }
   };
   return (
