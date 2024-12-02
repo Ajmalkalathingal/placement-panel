@@ -8,7 +8,7 @@ import pandas as pd
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .tasks import send_application_notification,send_interview_email_task
-from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication,InterviewDetails,User
+from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,CoordinatorProfile,PasswordResetToken,JobApplication,InterviewDetails,User,PlacementEvent
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
@@ -311,32 +311,12 @@ class RecruiterProfileDeleteView(generics.DestroyAPIView):
         return Response({"detail": "Recruiter profile deleted successfully."}, status=204)    
 
 
-from .tasks import send_job_post_email_to_students
 class JobCreateView(generics.CreateAPIView):
     serializer_class = JobSerializer 
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         job = serializer.save(recruiter=self.request.user.recruiterprofile)
-        self.send_email_to_students(job)
-
-    def send_email_to_students(self, job):
-        recruiter = job.recruiter
-        student_emails = StudentProfile.objects.values_list('user__email', flat=True)
-
-        subject = f"New Job Posting: {job.title}"
-        message = (
-            f"Dear Student,\n\n"
-            f"A new job has been posted by {recruiter.company_name}.\n\n"
-            f"Job Title: {job.title}\n"
-            f"Description: {job.description}\n"
-            f"Location: {job.location}\n\n"
-            f"Best regards,\nYour University Job Portal"
-        )
-
-        # Use Celery to send the email asynchronously
-        send_job_post_email_to_students.delay(subject, message, list(student_emails))
-
 
 
 @api_view(['POST'])
@@ -405,11 +385,12 @@ class JobApplicationsForRecruiterView(generics.ListAPIView):
 
     def get_queryset(self):
         recruiter = self.request.user
-        jobs = Job.objects.filter(recruiter__user=recruiter)
+        pk = self.kwargs.get("pk") 
 
-        # Check if the recruiter has jobs
+        jobs = Job.objects.filter(recruiter__user=recruiter, id=pk)
+
         if not jobs.exists():
-            return
+            return JobApplication.objects.none()
 
         return JobApplication.objects.filter(job__in=jobs)
 
@@ -449,7 +430,17 @@ class UpdateApplicationStatusView(APIView):
             application.status = new_status
             application.save()
 
-            return Response({"status": "Status updated successfully"}, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "status": "Status updated successfully",
+                    "application": {
+                        "id": application.id,
+                        "status": application.status,
+                        # Include any other relevant fields
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
 
         except JobApplication.DoesNotExist:
             return Response({"detail": "Application not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -513,7 +504,13 @@ def create_placement_event(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+    
+
+class DisplayPlacemetEvets(generics.ListAPIView):
+    queryset = PlacementEvent.objects.all().order_by('-id')[:6]
+    serializer_class = PlacementEventSerializer
+    permission_classes = [AllowAny]
 
 
 
@@ -626,7 +623,6 @@ class UploadStudentDataView(APIView):
                         'duration' : row['duration'],
                         'starting_date' : row['starting_date'],
                         'ending_date': row['ending_date'],
-                        'is_registered': row['Is Registered'],
                     }
                 )
 

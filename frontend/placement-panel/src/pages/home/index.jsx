@@ -18,15 +18,18 @@ const Index = () => {
     const pdfUrl = "src/assets/pdf/placement brochure.pdf";
     const link = document.createElement("a");
     link.href = pdfUrl;
-    link.download = "placement-report.pdf"; // The name of the file when downloading
-    link.click(); // Trigger the download
+    link.download = "placement-report.pdf"; 
+    link.click();
   };
   return (
     <>
       <div>
+        <section className="header-section">
         <Header />
+        </section>
 
         {/* user section */}
+        <section className="user-section">
         <div className="container">
           <div className="row mt-4">
             <div className="col-12 col-md-3 mb-4">
@@ -109,7 +112,9 @@ const Index = () => {
             </div>
           </div>
         </div>
-
+        </section>
+        
+        {/* about section */}
         <section
           id="#about"
           className="about_section layout_padding long_section"
@@ -139,9 +144,13 @@ const Index = () => {
           </div>
         </section>
         {/* end about section */}
+
         {/* blog section */}
+        <section>
         <Blog />
+        </section>
         {/* end blog section */}
+
 
         <div className="container-fuid m-3">
           <div className="row">
@@ -236,15 +245,11 @@ const Index = () => {
         </div>
 
         {/* placemet section */}
-        <section className="client_section layout_padding-bottom">
-          <div className="container">
-            <div className="heading_container">
+        <section className="container">
               <h2>Recent Placement</h2>
-            </div>
             <Swiper />
-          </div>
         </section>
-        {/* end client section */}
+        {/* end placment section */}
 
         {/* footer section */}
         <Footer />

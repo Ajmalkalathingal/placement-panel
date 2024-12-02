@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../../componets/input/input";
 import "./style.css";
 import Button from "../../componets/button";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api";
+import { REFRESH_TOKEN } from "../../constant";
+import Profile from "../profile/profile";
+import Cookies from "js-cookie";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -55,6 +58,13 @@ function Signup() {
       setLoading(false);
     }
   };
+  
+  useEffect(() => {
+    const refreshToken = Cookies.get(REFRESH_TOKEN);
+    if (refreshToken) {
+      navigate("/profile"); 
+    }
+  }, [navigate]);
 
   return (
     <>

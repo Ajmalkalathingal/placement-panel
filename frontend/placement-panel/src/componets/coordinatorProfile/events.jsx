@@ -6,9 +6,19 @@ const PlacementEventForm = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    image : '',
     event_date: '',
     is_active: true,
   });
+
+  const handleEventImage = (e) => {
+    const file = e.target.files[0]; 
+    setFormData((prevData) => ({
+      ...prevData,
+      image: file, // Update the image field in state
+    }));
+  };
+  
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -21,21 +31,34 @@ const PlacementEventForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('description', formData.description);
+    data.append('event_date', formData.event_date);
+    data.append('is_active', formData.is_active);
+    if (formData.image) {
+      data.append('image', formData.image); // Add the file
+    }
+
     try {
-      const response = await api.post('api/placement-events/',formData);
+      const response = await api.post('api/placement-events/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       console.log(response)
 
       if (response.status === 201) {
-        // Handle success (e.g., show a success message or redirect)
         toast.success('Placement Event created successfully!');
       } else {
-        // Handle error
         alert('Failed to create placement event');
       }
     } catch (error) {
       console.error('Error:', error);
     }
   };
+
 
   return (
     <div className="container mt-5">
@@ -69,6 +92,18 @@ const PlacementEventForm = () => {
                 onChange={handleChange}
                 required
               ></textarea>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="event_date">Event Photo</label>
+              <input
+                type="file"
+                id="event_file"
+                name="image"
+                className="form-control"
+                onChange={handleEventImage}
+                required
+              />
             </div>
 
             <div className="form-group">

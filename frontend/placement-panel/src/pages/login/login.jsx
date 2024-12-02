@@ -18,9 +18,9 @@ function Login() {
 
   // Check if user is already logged in
   useEffect(() => {
-    const accessToken = Cookies.get(ACCESS_TOKEN);
-    if (accessToken) {
-      navigate("/profile"); // Redirect to profile if access token exists
+    const refreshToken = Cookies.get(REFRESH_TOKEN);
+    if (refreshToken) {
+      navigate("/profile"); 
     }
   }, [navigate]);
 

@@ -5,6 +5,10 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from .models import JobApplication,RecruiterProfile, User
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @shared_task
 def send_job_post_email_to_students(subject, message, recipient_list):
     send_mail(
@@ -43,6 +47,8 @@ def send_verification_email(recruiter_id):
     try:
         recruiter = RecruiterProfile.objects.get(id=recruiter_id)
         verifiers = User.objects.filter(user_type='verifier').values_list('email', flat=True)
+
+        logger.info(f"Verifiers: {list(verifiers)}")
 
         if verifiers:
             send_mail(

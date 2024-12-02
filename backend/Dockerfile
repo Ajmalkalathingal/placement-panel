@@ -52,3 +52,4 @@ USER celery
 
 # Define the default command (this can be overridden by Docker Compose)
 CMD ["celery", "-A", "project", "worker", "--loglevel=info"]
+# CMD celery -A celery_app worker --loglevel=INFO --concurrency=8 -O fair -P prefork -n cel_app_worker

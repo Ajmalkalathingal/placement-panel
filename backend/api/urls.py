@@ -35,7 +35,9 @@ from .views import (
 
     InterviewDetailsCreateView,
     InterviewDetailsListView,
+
     create_placement_event,
+    DisplayPlacemetEvets,
 
     CourseChoicesView,
     RegisterStudentView,
@@ -91,7 +93,7 @@ urlpatterns = [
     path('jobs/<int:job_id>/apply/', apply_for_job, name='apply_for_job'),
     path('jobs/applied-list/', AppliedJobListView.as_view(), name='apply_for_job'),
 
-    path('recruiter/job-applications/', JobApplicationsForRecruiterView.as_view(), name='job-applications-for-recruiter'),
+    path('recruiter/job-applicants/<int:pk>/', JobApplicationsForRecruiterView.as_view(), name='job-applications-for-recruiter'),
     path('applications/unseen-count/', unseen_applications_count, name='unseen-applications-count'),
     path('applications/mark-seen/', mark_applications_as_seen, name='mark-applications-as-seen'),
     path('recruiter/job-applications/<int:pk>/',UpdateApplicationStatusView.as_view(), name='update-application-status'),
@@ -100,6 +102,7 @@ urlpatterns = [
     path('interview-details-list/', InterviewDetailsListView.as_view(), name='interview-details-list'),
 
     path('placement-events/', create_placement_event, name='create_placement_event'),
+    path('list-events/', DisplayPlacemetEvets.as_view(), name='PlacemetEvets'),
 
     # registration
     path('course-choices/', CourseChoicesView.as_view(), name='course-choices'),

@@ -42,8 +42,9 @@ const InterviewDetails = () => {
 
             return (
               <Col key={id} md={6} lg={4}>
-                <Card className="shadow-sm border-0 h-100 rounded-4 hover-card">
+                <Card className="shadow-sm border-0 h-100 rounded-4 ">
                   <Card.Body className="p-4">
+                  <h5 className='mb-2'>Your selected for the interview</h5>
                     <div className="d-flex align-items-center mb-3">
                       <Image
                         src={recruiter?.company_logo || "https://via.placeholder.com/50"}
@@ -60,6 +61,7 @@ const InterviewDetails = () => {
                         </small>
                       </div>
                     </div>
+                    
                     <p className="mb-2">
                       <strong>Job Title:</strong> {title || "N/A"}
                     </p>

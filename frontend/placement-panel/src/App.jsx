@@ -4,7 +4,6 @@ import "bootstrap/dist/css/bootstrap.min.css"
 
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { Route, Routes } from 'react-router-dom'
-import Home from './pages/home/home';
 import Signup from './pages/signup/SignupStudent';
 import { ToastContainer } from 'react-toastify';
 import Login from './pages/login/login'

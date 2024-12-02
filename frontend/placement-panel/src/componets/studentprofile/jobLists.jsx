@@ -63,11 +63,11 @@ const JobList = ({ profile }) => {
               <div className="card-body">
                 <div className="d-flex flex-column flex-lg-row">
                   <span className="avatar avatar-text rounded-3 me-4 bg-info mb-2">
-                    {job.title.charAt(0)}
+                    {job.recruiter.company_name}
                   </span>
                   <div className="row flex-fill">
                     <div className="col-sm-5">
-                      <h4 className="h5">{job.title}</h4>
+                      <h4 className="h5">Job Title  <u>{job.title}</u></h4>
                       <span className="badge bg-secondary m-2">Location: {job.location}</span>
                       <span className="badge bg-success">Salary: {job.salary}</span>
                       <br />

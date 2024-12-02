@@ -43,7 +43,6 @@ api.interceptors.response.use(
                 const response = await axios.post('http://127.0.0.1:8000/api/token/refresh/', { refresh: refreshToken }); // Correct endpoint and payload
 
                 const newAccessToken = response.data.access; // Access the new token
-                console.log(newAccessToken, 'my new token');
 
                 Cookies.set(ACCESS_TOKEN, newAccessToken); // Set the new access token
 
@@ -60,7 +59,6 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
 
 
 // Add the update method

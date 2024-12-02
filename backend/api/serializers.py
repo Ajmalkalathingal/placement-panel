@@ -241,7 +241,7 @@ class InterviewDetailsSerializer(serializers.ModelSerializer):
 class PlacementEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlacementEvent
-        fields = ['title', 'description', 'event_date', 'is_active']
+        fields = ['title', 'description', 'image', 'event_date', 'is_active']
         
 #--------------------------------- password rest ----------------------------------------#
 from django.core.mail import send_mail

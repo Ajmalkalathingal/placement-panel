@@ -36,7 +36,6 @@ const CoordinatorProfile = ({ profile }) => {
     setActiveSection(section);
     setSidebarActive(false);
   };
-  console.log(profile)
 
   return (
     <div className="app">

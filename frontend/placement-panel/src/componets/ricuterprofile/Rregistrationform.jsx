@@ -49,7 +49,13 @@ function RicruterRegistrationForm({onSubmit}) {
     <div className="container register">
     <div className="row">
       <div className="col-md-3 register-left">
-        <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt=""/>
+      <img
+            src={"src/assets/images/logo2.png"}
+            alt="University Logo"
+            width="40"
+            height="40"
+            className="me-2 ml-4"
+          />
         <h3>Welcome</h3>
         <p>Calicut university DCMS placeemnt cell</p>
       </div>

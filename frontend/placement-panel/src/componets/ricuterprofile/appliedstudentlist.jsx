@@ -8,40 +8,71 @@ import {
   Col,
   Container,
   Button,
+  Dropdown,
+  Table,
 } from "react-bootstrap";
 import api from "../../api";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import InterviewDetailsModal from "./InterviewDetailsModal";
 
 const AppliedStudentList = () => {
   const [students, setStudents] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
-    const fetchAppliedStudents = async () => {
+    // Fetch the recruiter's job posts on component mount
+    const fetchJobs = async () => {
       try {
-        const response = await api.get(`/api/recruiter/job-applications/`);
-        setStudents(response.data);
+        const response = await api.get(`/api/jobs/`);
+        if (response.data && response.data.results) {
+          setJobs(response.data.results);
+        }
       } catch (err) {
-        console.error(err);
-        setError("Error fetching applied students");
-      } finally {
-        setLoading(false);
+        console.error("Error fetching jobs", err);
+        setError("Failed to load job posts");
       }
     };
 
-    fetchAppliedStudents();
-  }, [students]);
+    fetchJobs();
+  }, []);
+
+  const fetchAppliedStudents = async (jobId) => {
+    console.log(jobId);
+    setLoading(true);
+    // setStudents([]);
+    setError(null);
+    try {
+      const response = await api.get(
+        `/api/recruiter/job-applicants/${jobId}/`
+      );
+      if (response.data) {
+        setStudents(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching applied students", err);
+      setError("Error fetching applied students");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJobSelection = (job) => {
+    setSelectedJob(job);
+    fetchAppliedStudents(job.id);
+  };
 
   const handleStatusChange = async (studentId, status) => {
     try {
-      await api.patch(`/api/recruiter/job-applications/${studentId}/`, {
+      const response = await api.patch(`/api/recruiter/job-applications/${studentId}/`, {
         status,
       });
+      console.log(response)
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
           student.id === studentId ? { ...student, status } : student
@@ -65,121 +96,122 @@ const AppliedStudentList = () => {
   const handleEmailSent = (studentId) => {
     setStudents((prevStudents) =>
       prevStudents.map((student) =>
-        student === studentId ? { ...student, emailSent: true } : student
+        student.id === studentId ? { ...student, emailSent: true } : student
       )
     );
   };
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center mt-5">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <p className="text-center text-danger">{error}</p>;
-  }
   return (
     <Container className="mt-5">
-      <h2 className="text-primary mb-4 text-center">
-        Applied Students for Your Jobs
-      </h2>
-      <Row>
-        {students.length > 0 ? (
-          students.map((student) => (
-            <Col key={student.id} md={6} lg={4} className="mb-4">
-              <Card className="shadow-sm border h-100 rounded-3">
-                <Card.Body>
-                  <div className="d-flex align-items-center mb-3">
-                    <Image
-                      src={
-                        student.student.img || "https://via.placeholder.com/50"
-                      }
-                      roundedCircle
-                      width={50}
-                      height={50}
-                      alt={`${student.student.user.first_name}'s profile`}
-                      className="me-3 border"
-                    />
-                    <div>
-                      <h5 className="card-title mb-1">
-                        {student.student.user.first_name}
-                      </h5>
-                      <small className="text-muted">
-                        {student.student.user.email}
-                      </small>
-                    </div>
-                  </div>
-                  <p className="mb-1">
-                    <strong>Graduation Year:</strong>{" "}
-                    {student.student.graduation_year || "current"}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Course:</strong>{" "}
-                    {student.student.registration.course || "N/A"}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Email:</strong>{" "}
-                    {student.student.user.email || "N/A"}
-                  </p>
-                  {student.student.resume && (
-                    <p className="mb-1">
-                      <strong>Resume:</strong>{" "}
-                      <a
-                        href={student.student.resume}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View Resume
-                      </a>
-                    </p>
-                  )}
-                  <p className="mb-1">
-                    <strong>Applied On:</strong>{" "}
-                    {new Date(student.applied_on).toLocaleDateString()}
-                  </p>
-                  <div className="mt-3">
-                    <Badge
-                      bg={
-                        student.status === "accepted"
-                          ? "success"
-                          : student.status === "rejected"
-                          ? "danger"
-                          : student.status === "reviewed"
-                          ? "warning"
-                          : "secondary"
-                      }
-                      className="p-2"
+      <h2 className="text-primary mb-4 text-center">Applied Students</h2>
+      <Row className="justify-content-center">
+        {jobs.map((job) => (
+          <Col key={job.id} md={4} lg={3} className="mb-3">
+            <Card
+              className={`shadow-sm p-3 rounded-3 ${
+                selectedJob && selectedJob.id === job.id
+                  ? "bg-primary text-white"
+                  : "border-secondary"
+              }`}
+              onClick={() => handleJobSelection(job)}
+              style={{ cursor: "pointer" }}
+            >
+              <Card.Body>
+                <Card.Title className="">{job.title}</Card.Title>
+                <Card.Text className="">
+                {new Date(job.deadline).toISOString().split('T')[0]}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      {loading ? (
+        <div className="d-flex justify-content-center mt-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : error ? (
+        <p className="text-center text-danger">{error}</p>
+      ) : students.length > 0 ? (
+        <Table striped bordered hover responsive className="mt-4">
+          <thead className="table-primary">
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Graduation Year</th>
+              <th>Course</th>
+              <th>Resume</th>
+              <th>Applied On</th>
+              <th>Status</th>
+              <th>Actions</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student, index) => (
+              <tr key={student.id}>
+                <td>{index + 1}</td>
+                <td>{student.student.user.first_name}</td>
+                <td>{student.student.user.email}</td>
+                <td>{student.student.graduation_year || "current"}</td>
+                <td>{student.student.registration.course || "N/A"}</td>
+                <td>
+                  {student.student.resume ? (
+                    <a
+                      href={student.student.resume}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      {student.status.charAt(0).toUpperCase() +
-                        student.status.slice(1)}
-                    </Badge>
-                    <div className="mt-2">
-                      {!student.email_sent ? (
-                        <Button
-                          variant="primary"
-                          className="me-2 d-flex align-items-center"
-                          onClick={() => handleShowModal(student.id)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faPaperPlane}
-                            className="me-2"
-                          />
-                          Send Interview Details
-                        </Button>
-                      ) : (
-                        <div className="d-flex align-items-center">
-                          <FontAwesomeIcon
-                            icon={faCheckCircle}
-                            className="text-success me-2"
-                          />{" "}
-                          {/* Success Icon */}
-                          <span className="">Email Sent</span>
-                        </div>
-                      )}
-                      {student.status === "rejected" ? (
+                      View Resume
+                    </a>
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
+                <td>{new Date(student.applied_on).toLocaleDateString()}</td>
+                <td>
+                  <Badge
+                    bg={
+                      student.status === "accepted"
+                        ? "success"
+                        : student.status === "rejected"
+                        ? "danger"
+                        : student.status === "reviewed"
+                        ? "warning"
+                        : "secondary"
+                    }
+                  >
+                    {student.status.charAt(0).toUpperCase() +
+                      student.status.slice(1)}
+                  </Badge>
+                </td>
+                <td>
+                  <div className="d-flex flex-column gap-2">
+                    {!student.email_sent ? (
+                      <Button
+                        variant="primary"
+                        className="d-flex align-items-center"
+                        onClick={() => handleShowModal(student.id)}
+                      >
+                        <FontAwesomeIcon icon={faPaperPlane} className="me-2" />
+                        Send Interview Details
+                      </Button>
+                    ) : (
+                      <div className="d-flex align-items-center">
+                        <FontAwesomeIcon
+                          icon={faCheckCircle}
+                          className="text-success me-2"
+                        />
+                        <span>Email Sent</span>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="d-flex flex-column gap-2">
+                  {student.status === "rejected" ? (
                         <Button
                           variant="success"
                           onClick={() =>
@@ -199,20 +231,17 @@ const AppliedStudentList = () => {
                           Reject
                         </Button>
                       )}
-                    </div>
                   </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
-        ) : (
-          <Col className="text-center">
-            <p className="text-muted">
-              No students have applied for your jobs.
-            </p>
-          </Col>
-        )}
-      </Row>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      ) : (
+        <p className="text-muted text-center mt-4">
+          No students have applied for this job.
+        </p>
+      )}
 
       {/* Modal for Sending Interview Details */}
       {selectedStudent && (

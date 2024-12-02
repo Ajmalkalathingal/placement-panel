@@ -13,7 +13,7 @@ import api from "../../api";
 
 const RecruterProfile = ({ profile }) => {
   const menuItems = getMenuItems("Recruiter");
-  const [activeSection, setActiveSection] = useState(menuItems[0].section);
+  const [activeSection, setActiveSection] = useState(menuItems[3].section);
   const [profiles, setProfile] = useState(profile);
   const [unseenCount, setUnseenCount] = useState(0);
 
