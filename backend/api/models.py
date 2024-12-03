@@ -95,8 +95,7 @@ class StudentRegistration(models.Model):
 
 class CoordinatorRegistration(models.Model):
     coordinator_id = models.CharField(max_length=20, unique=True)  
-    email = models.EmailField(unique=True)
-    registration_code = models.CharField(max_length=100, null=True, blank=True)  
+    department = models.CharField(max_length=50)
     is_registered = models.BooleanField(default=False) 
     user = models.OneToOneField(
         User, 
@@ -107,8 +106,8 @@ class CoordinatorRegistration(models.Model):
 
     def __str__(self):
         if self.user:  
-            return f'{self.user.first_name} {self.user.last_name} - {self.email} - Registered: {self.is_registered}'
-        return f'{self.coordinator_id} - {self.email} - Registered: {self.is_registered}'
+            return f'{self.user.first_name} {self.user.last_name}  - Registered: {self.is_registered}'
+        return f'{self.coordinator_id} - Registered: {self.is_registered}'
 
 
 # Student Profile Model

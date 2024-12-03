@@ -150,8 +150,33 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         # Update other fields in the instance
         return super().update(instance, validated_data)
         
-   
-     
+
+class CoordinatorRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        ordering = ['id']
+        model = CoordinatorRegistration
+        fields = "__all__"
+
+    def validate_registration_number(self, value):
+        if self.instance:
+            # Exclude the current instance from the validation check
+            if CoordinatorRegistration.objects.filter(coordinator_id=value).exclude(id=self.instance.id).exists():
+                raise serializers.ValidationError("This student ID is already registered.")
+        else:
+            if CoordinatorRegistration.objects.filter(registration_number=value).exists():
+                raise serializers.ValidationError("This student ID is already registered.")
+        return value
+    
+
+class CoordinatorProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True) 
+    registration = CoordinatorRegisterSerializer(read_only=True) 
+    class Meta:
+        model = CoordinatorProfile
+        fields = '__all__'        
+        read_only_fields = ['user','registration']
+
+
 class RecruiterProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True) 
     company_logo = serializers.ImageField(required=False)
@@ -186,24 +211,17 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
 
             instance.save()
         return instance
-
-class CoordinatorProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True) 
-    class Meta:
-        model = CoordinatorProfile
-        fields = '__all__'        
-        read_only_fields = ['user']
-
-
+    
 
 class JobSerializer(serializers.ModelSerializer):
     recruiter = RecruiterProfileSerializer(read_only=True)
+    application_count = serializers.IntegerField(read_only=True) 
     
     class Meta:
         ordering = ['-id']
         model = Job
         fields = '__all__'        
-        read_only_fields = ['recruiter']
+        read_only_fields = ['recruiter']   
 
     def create(self, validated_data):
         # The user is already set in the context

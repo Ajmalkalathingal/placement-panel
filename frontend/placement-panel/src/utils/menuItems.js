@@ -37,6 +37,7 @@ import {
         return [
           { section: 'home', label: 'Profile', icon: faUser },
           { section: 'verify recruter', label: 'verify recruter', icon: faCheckCircle },
+          { section: 'Coordinator list', label: 'Coordinator list', icon: faCheckCircle },
           { section: 'create cordinators', label: 'create cordinators', icon: faCheckCircle },
           { section: 'logout', label: 'Logout', icon: faSignOutAlt },
         ];

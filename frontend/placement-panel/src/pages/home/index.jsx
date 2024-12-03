@@ -94,7 +94,7 @@ const Index = () => {
 
             <div className="col-12 col-md-3 mb-4">
               <Link
-                to={"/signup-for-coordinator"}
+                to={"/login"}
                 className="card shadow-sm hover-shadow rounded-lg hover-card"
               >
                 <div className="card-body text-center">

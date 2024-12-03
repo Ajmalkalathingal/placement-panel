@@ -48,7 +48,10 @@ from .views import (
     CordinatorProfileView,
 
     VerifierProfileView,
-    VerifyRecruiterView,
+    VerifyRecruiterView, 
+    RegisterCoordinatorView,
+    CoordinatorListView, 
+    CoordinatorProfileDeleteView,  
 
     export_student_registration_to_excel,
     UploadStudentDataView,
@@ -117,6 +120,9 @@ urlpatterns = [
     # VerifierProfileView
     path('verifier/profile/', VerifierProfileView.as_view(), name='upload_student_data'),
     path('recruiters/<int:recruiter_id>/verify/', VerifyRecruiterView.as_view(), name='verify-recruiter'),
+    path('register-coordinator/', RegisterCoordinatorView.as_view(), name='coordinator-reg'),
+    path('coordinator-list/', CoordinatorListView.as_view(), name='coordinator-list'),
+    path('coordinator/<int:id>/delete/', CoordinatorProfileDeleteView.as_view(), name='CoordinatorProfileDeleteView'),
 
 
     # upload and download reg student 

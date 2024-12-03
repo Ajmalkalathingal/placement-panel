@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../sideBar/SideBar";
 import RecruiterList from "./RecruterList";
 import CoordinatorRegistrationForm from "./CoordinatorRegistration";
+import CoordinatorList from "./coordinatorList";
 
 const Verifier = ({profile}) => {
   // Fetch menu items dynamically using the utility function
@@ -55,8 +56,8 @@ const Verifier = ({profile}) => {
 
         {/* {activeSection === "home" && <CDHome />} */}
         {activeSection === "verify recruter" && <RecruiterList />}
+        {activeSection === "Coordinator list" && <CoordinatorList />}
         {activeSection === "create cordinators" && <CoordinatorRegistrationForm />}
-        {/* {activeSection === "uploadStudentData" && <UploadDataPDF />} */}
         {/* {activeSection === "placementevent" && <PlacementEventForm />} */}
       </div>
 

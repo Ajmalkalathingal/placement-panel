@@ -105,27 +105,44 @@ const AppliedStudentList = () => {
     <Container className="mt-5">
       <h2 className="text-primary mb-4 text-center">Applied Students</h2>
       <Row className="justify-content-center">
-        {jobs.map((job) => (
-          <Col key={job.id} md={4} lg={3} className="mb-3">
-            <Card
-              className={`shadow-sm p-3 rounded-3 ${
-                selectedJob && selectedJob.id === job.id
-                  ? "bg-primary text-white"
-                  : "border-secondary"
-              }`}
-              onClick={() => handleJobSelection(job)}
-              style={{ cursor: "pointer" }}
-            >
-              <Card.Body>
-                <Card.Title className="">{job.title}</Card.Title>
-                <Card.Text className="">
-                {new Date(job.deadline).toISOString().split('T')[0]}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+  {jobs.map((job) => (
+    <Col key={job.id} md={4} lg={3} className="mb-4">
+      <Card
+        className={`shadow-sm p-3 rounded-3 ${
+          selectedJob && selectedJob.id === job.id
+            ? "bg-primary text-white"
+            : "border-secondary"
+        }`}
+        onClick={() => handleJobSelection(job)}
+        style={{ cursor: "pointer", transition: "transform 0.2s" }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      >
+        <Card.Body>
+          <Card.Title className="fs-5 mb-2 text-truncate">
+            {job.title}
+          </Card.Title>
+          <Card.Text className="text-muted mb-3 small">
+            Applications: {job.application_count}
+          </Card.Text>
+          <div className="mb-2">
+            <span className="badge bg-success text-white small">
+              {job.job_type.replace("-", " ").toUpperCase()}
+            </span>
+          </div>
+          <div className="text-muted small w-100 text-end">
+            <strong>Deadline:</strong>{" "}
+            <span className="fw-bold">
+              {new Date(job.deadline).toISOString().split("T")[0]}
+            </span>
+          </div>
+        </Card.Body>
+      </Card>
+    </Col>
+  ))}
+</Row>
+
+
 
       {loading ? (
         <div className="d-flex justify-content-center mt-5">

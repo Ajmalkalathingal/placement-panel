@@ -45,10 +45,31 @@ const RecruiterList = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this recruiter?");
+    
+    if (!confirmDelete) {
+      return;
+    }
+  
+    try {
+      const response = await api.delete(`/api/recruiters/${id}/delete/`);
+  
+      if (response.status === 204) {
+        setRecruiters((prev) => prev.filter((recruiter) => recruiter.id !== id));
+        toast.success("Recruiter deleted successfully.");
+      }
+    } catch (error) {
+      console.error("Failed to delete recruiter:", error);
+      toast.warning("Error deleting recruiter. Please try again.");
+    }
+  };
+  
+  
+  
   if (loading) {
     return <p>Loading...</p>;
   }
-  console.log(recruiters);
   return (
     <div className="container mt-4">
       <h2 className="text-center mb-4">Recruiter List</h2>
@@ -64,6 +85,7 @@ const RecruiterList = () => {
               <th scope="col">Contact</th>
               <th scope="col">Email</th>
               <th scope="col">Verify</th>
+              <th scope="col">Actiion</th>
               <th scope="col">Delete</th>
             </tr>
           </thead>
@@ -86,6 +108,7 @@ const RecruiterList = () => {
                 </td>
                 <td>{item.contact_number}</td>
                 <td>{item.user.email}</td>
+                <td>{item.is_active ? "verified" : "Not verified"}</td>
                 <td>
                   <button
                     className={`btn btn-sm mt-1 ${
@@ -99,7 +122,7 @@ const RecruiterList = () => {
                 <td>
                   <button
                     className="btn btn-primary btn-sm mt-1"
-                    onClick={() => handleVerify(item.id)}
+                    onClick={() => handleDelete(item.id)}
                   >
                     Delete Recruiter
                   </button>

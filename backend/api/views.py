@@ -12,6 +12,7 @@ from .models import StudentProfile,RecruiterProfile,Job,StudentRegistration,Coor
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
+from django.db.models import Count
 from django.core.exceptions import ValidationError
 
 from .serializers import (UserSerializer,
@@ -20,6 +21,7 @@ from .serializers import (UserSerializer,
         CustomTokenObtainPairSerializer,
         JobSerializer,
         RegistredStudentSerializer,
+        CoordinatorRegisterSerializer,
         CoordinatorProfileSerializer,
         PasswordResetRequestSerializer,
         PasswordResetSerializer,
@@ -292,23 +294,36 @@ class RecruiterProfileUpdateView(generics.UpdateAPIView):
     
     
 class RecruiterProfileDeleteView(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated, IsCoordinator | IsRecruiter]
+    """
+    View to delete a recruiter profile.
+    """
+    permission_classes = [IsAuthenticated, IsVerifier]
 
-    def get_object(self, recruiter_id=None):
+    def get_object(self):
+        recruiter_id = self.kwargs.get('recruiter_id')
+
         if recruiter_id:
             try:
                 return RecruiterProfile.objects.get(id=recruiter_id)
             except RecruiterProfile.DoesNotExist:
-                raise NotFound("Recruiter profile not found.")
+                raise NotFound({"detail": "Recruiter profile not found."})
         
-        return RecruiterProfile.objects.get(user=self.request.user)
+        try:
+            return RecruiterProfile.objects.get(user=self.request.user)
+        except RecruiterProfile.DoesNotExist:
+            raise PermissionDenied({"detail": "You do not have a recruiter profile to delete."})
 
     def delete(self, request, *args, **kwargs):
-        recruiter_id = kwargs.get('recruiter_id')
-        recruiter_profile = self.get_object(recruiter_id=recruiter_id)
-        
+        """
+        Handle delete request for a recruiter profile.
+        """
+        recruiter_profile = self.get_object()
+
+        self.check_object_permissions(request, recruiter_profile)
+
+        # Perform deletion
         recruiter_profile.delete()
-        return Response({"detail": "Recruiter profile deleted successfully."}, status=204)    
+        return Response({"detail": "Recruiter profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)   
 
 
 class JobCreateView(generics.CreateAPIView):
@@ -350,7 +365,11 @@ class JobListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Job.objects.filter(recruiter__user=self.request.user).order_by('-id') 
+        return (
+            Job.objects.filter(recruiter__user=self.request.user)
+            .annotate(application_count=Count('applications'))
+            .order_by('-id')
+        ) 
 
     
 class AppliedJobListView(generics.ListAPIView):
@@ -361,8 +380,7 @@ class AppliedJobListView(generics.ListAPIView):
         # Ensure that the queryset is ordered
         return JobApplication.objects.filter(student__user=self.request.user).order_by('-applied_on') 
     
-    
-    
+      
 class JobUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
@@ -512,10 +530,9 @@ class DisplayPlacemetEvets(generics.ListAPIView):
     serializer_class = PlacementEventSerializer
     permission_classes = [AllowAny]
 
-
-
+    
 class CordinatorProfileView(APIView):
-    permission_classes = [IsAuthenticated, IsVerifier|IsCoordinator] 
+    permission_classes = [IsCoordinator] 
     def get(self, request):
         try:
             user = request.user
@@ -564,9 +581,54 @@ class VerifyRecruiterView(APIView):
         except RecruiterProfile.DoesNotExist:
             return Response({"error": "Recruiter not found"}, status=status.HTTP_404_NOT_FOUND)
         
+class RegisterCoordinatorView(APIView):
+    """
+    API view to handle Coordinator registration
+    """
+    permission_classes = [IsVerifier]
+
+    def post(self, request, *args, **kwargs):
+        serializer = CoordinatorRegisterSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()  
+            return Response({
+                "message": "Student registered successfully",
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CoordinatorListView(generics.ListAPIView):
+    queryset = CoordinatorProfile.objects.all().order_by('-id')
+    permission_classes = [IsVerifier]
+    serializer_class = CoordinatorProfileSerializer
 
+
+class CoordinatorProfileDeleteView(generics.DestroyAPIView):
+    queryset = CoordinatorProfile.objects.all()
+    permission_classes = [IsAuthenticated, IsVerifier]
+
+    def get_object(self):
+        obj_id = self.kwargs.get("id")
+        try:
+            return self.queryset.get(id=obj_id)
+        except CoordinatorProfile.DoesNotExist:
+            raise NotFound("Coordinator profile not found.")
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        user = instance.user
+        registration = instance.registration
+
+        self.perform_destroy(instance)
+
+        user.delete()
+        registration.delete()
+
+        return Response({"detail": "Coordinator profile and related data deleted successfully."}, status=204)
+    
 
 # exel upload for registration
 import pandas as pd

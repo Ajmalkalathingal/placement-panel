@@ -3,7 +3,7 @@ import api from "../../api";  // Make sure the API is correctly set up
 
 const CoordinatorRegistrationForm = () => {
   const [coordinatorId, setCoordinatorId] = useState("");
-  const [email, setEmail] = useState("");
+  const [department, setDepartment] = useState("");
   const [registrationCode, setRegistrationCode] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,10 +16,9 @@ const CoordinatorRegistrationForm = () => {
     setError("");
 
     try {
-      const response = await api.post("/api/coordinators/register/", {
+      const response = await api.post("/api/register-coordinator/", {
         coordinator_id: coordinatorId,
-        email: email,
-        registration_code: registrationCode,
+        department: department,
         is_registered: isRegistered,
       });
 
@@ -32,10 +31,13 @@ const CoordinatorRegistrationForm = () => {
         setIsRegistered(false);
       }
     } catch (err) {
-      setError("Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+      if (err.response && err.response.data) {
+        const errorMessages = Object.values(err.response.data);
+        setError(`Registration failed: ${errorMessages}`);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } 
   };
 
   return (
@@ -64,25 +66,13 @@ const CoordinatorRegistrationForm = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="form-control"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="registrationCode">Registration Code</label>
+                  <label htmlFor="email">Department</label>
                   <input
                     type="text"
-                    id="registrationCode"
+                    id="text"
                     className="form-control"
-                    value={registrationCode}
-                    onChange={(e) => setRegistrationCode(e.target.value)}
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
                     required
                   />
                 </div>
