@@ -27,8 +27,6 @@ function App() {
         <ToastContainer/>
         <Routes>
         <Route path="/" element={<Index/>}/>
-        <Route path="/" element={<ContactUs/>}/>
-        <Route path="/" element={<Blog/>}/>
         <Route path="/signup-for-student" element={<Signup />} />
         <Route path="/signup-for-recruiter" element={<SignUpRicuter />} />
         <Route path="/signup-for-coordinator" element={<SignupCoordinator />} />
