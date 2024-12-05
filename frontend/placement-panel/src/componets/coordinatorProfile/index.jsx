@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import './rstyle.css';
-import CDHome from './CDhome';
-import StuList from './StuList';
-import Registration from './registration';
-import UploadDataPDF from './UploadPDF';
-import PlacementEventForm from './events';
-import Sidebar from '../sideBar/SideBar';
-
+import React, { useEffect, useState } from "react";
+import "./rstyle.css";
+import CDHome from "./CDhome";
+import StuList from "./StuList";
+import Registration from "./registration";
+import UploadDataPDF from "./UploadPDF";
+import PlacementEventForm from "./events";
+import Sidebar from "../sideBar/SideBar";
 
 const CoordinatorProfile = ({ profile }) => {
   const [activeSection, setActiveSection] = useState("home");
@@ -41,7 +40,7 @@ const CoordinatorProfile = ({ profile }) => {
     <div className="app">
       <Sidebar
         profile={profile}
-        role = 'Coordinator'
+        role="Coordinator"
         activeSection={activeSection}
         handleSectionChange={handleSectionChange}
         isMobile={isMobile}

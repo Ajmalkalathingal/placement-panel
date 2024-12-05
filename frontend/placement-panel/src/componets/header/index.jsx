@@ -1,9 +1,27 @@
 const Header = () => {
+
+  const handleNavClick = (event) => {
+    event.preventDefault();
+    const targetId = event.target.getAttribute("href").substring(1);
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      const headerOffset = 60; // Adjust for fixed header
+      const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <>
-      <div className="hero_area">
+      <div className="hero_area ">
         <header className="header_section long_section px-0">
-          <nav className="navbar navbar-expand-lg custom_nav-container ">
+          <nav className="navbar navbar-expand-lg custom_nav-container">
             <a className="navbar-brand" href="index.html">
               <img
                 src={"src/assets/images/logo2.png"}
@@ -32,36 +50,43 @@ const Header = () => {
               <div className="d-flex mx-auto flex-column flex-lg-row align-items-center">
                 <ul className="navbar-nav  ">
                   <li className="nav-item active">
-                    <a className="nav-link" href="index.html">
+                    <a className="nav-link" href="#home" onClick={handleNavClick}>
                       Home <span className="sr-only">(current)</span>
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link"> About</a>
+                    <a href="#contact" onClick={handleNavClick} className="nav-link"> About</a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link" href="furniture.html">
+                    <a className="nav-link" href="#why-dcms" onClick={handleNavClick}>
                       why Dcms
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link" href="blog.html">
+                    <a className="nav-link" href="">
                       Blog
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link" href="contact.html">
+                    <a href="#contact" onClick={handleNavClick} className="nav-link">
                       Contact Us
                     </a>
                   </li>
                 </ul>
               </div>
+              <div className="quote_btn-container">
+                <a href>
+                  <span>Login</span>
+                  <i className="fa fa-user" aria-hidden="true" />
+                </a>
+              </div>
             </div>
           </nav>
         </header>
         {/* end header section */}
+        
         {/* slider section */}
-        <section className="slider_section long_section">
+        <section id="home" className="slider_section long_section">
           <div
             id="customCarousel"
             className="carousel slide"

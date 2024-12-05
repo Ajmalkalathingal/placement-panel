@@ -9,15 +9,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@shared_task
-def send_job_post_email_to_students(subject, message, recipient_list):
-    send_mail(
-        subject,
-        message,
-        'your-email@example.com',  # From email
-        recipient_list,
-        fail_silently=False,
-    )
 
 @shared_task
 def send_application_notification(application_id):
@@ -48,7 +39,7 @@ def send_verification_email(recruiter_id):
         recruiter = RecruiterProfile.objects.get(id=recruiter_id)
         verifiers = User.objects.filter(user_type='verifier').values_list('email', flat=True)
 
-        logger.info(f"Verifiers: {list(verifiers)}")
+        # logger.info(f"Verifiers: {list(verifiers)}")
 
         if verifiers:
             send_mail(

@@ -9,12 +9,12 @@ const StuList = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState("");
 
-    // Pagination state
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 20; 
+  const itemsPerPage = 20;
 
   // Open the modal and set the selected student for editing
   const handleEditClick = (student) => {
@@ -24,7 +24,7 @@ const StuList = () => {
 
   // Close the modal
   const handleCloseModal = () => {
-    console.log('clicked');
+    console.log("clicked");
     setModalOpen(false);
     setSelectedStudent(null);
   };
@@ -32,14 +32,19 @@ const StuList = () => {
   // Handle update student
   const handleUpdateStudent = async (updatedData) => {
     if (!selectedStudent) return; // Ensure there's a selected student
-  console.log(updatedData,'updated data')
+    console.log(updatedData, "updated data");
     try {
-      const response = await api.put(`/api/student-list/${selectedStudent.id}/`, updatedData);
-      toast.success(' stuent data updated ')
+      const response = await api.put(
+        `/api/student-list/${selectedStudent.id}/`,
+        updatedData
+      );
+      toast.success(" stuent data updated ");
       // Update the students list
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
-          student.id === selectedStudent.id ? { ...student, ...response.data } : student
+          student.id === selectedStudent.id
+            ? { ...student, ...response.data }
+            : student
         )
       );
 
@@ -49,64 +54,63 @@ const StuList = () => {
     }
   };
 
+  const fetchStudents = async (page) => {
+    setLoading(true);
 
-    const fetchStudents = async (page) => {
-      setLoading(true);
+    try {
+      const response = await api.get(`/api/student-list/?page=${page}`);
+      setStudents(response.data.results);
+      const totalPages = Math.ceil(response.data.count / itemsPerPage);
+      setTotalPages(totalPages); // Update totalPages
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      try {
-        const response = await api.get(`/api/student-list/?page=${page}`);
-        setStudents(response.data.results);
-        const totalPages = Math.ceil(response.data.count / itemsPerPage);
-        setTotalPages(totalPages); // Update totalPages
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false); 
-      }
-    };
-
-    useEffect(() => {
-      fetchStudents(currentPage); // Fetch students for the current page
-    }, [currentPage]);
+  useEffect(() => {
+    fetchStudents(currentPage); // Fetch students for the current page
+  }, [currentPage]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
   return (
     <>
-        <Modal 
-          show={isModalOpen} 
-          onClose={handleCloseModal} 
-          student={selectedStudent} 
-          onUpdate={handleUpdateStudent} 
-        />
+      <Modal
+        show={isModalOpen}
+        onClose={handleCloseModal}
+        student={selectedStudent}
+        onUpdate={handleUpdateStudent}
+      />
       <div className="main-box clearfix">
-      <div className="table-responsive">
-      <table className="table table-hover align-middle mb-0 bg-white rounded shadow-sm">
-        <thead className="bg-light">
-          <tr>
-            <th className="text-primary">Student Name</th>
-            <th className="text-primary">Course</th>
-            <th className="text-primary">Registration Number</th>
-            <th className="text-primary">Status</th>
-            <th className="text-primary">Duration</th>
-            <th className="text-primary">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student) => (
-            <StudentRow
-              key={student.id}
-              student={student}
-              onEdit={() => handleEditClick(student)}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
+        <div className="table-responsive">
+          <table className="table table-hover align-middle mb-0 bg-white rounded shadow-sm">
+            <thead className="bg-light">
+              <tr>
+                <th className="text-primary">Student Name</th>
+                <th className="text-primary">Course</th>
+                <th className="text-primary">Registration Number</th>
+                <th className="text-primary">Status</th>
+                <th className="text-primary">Duration</th>
+                <th className="text-primary">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student) => (
+                <StudentRow
+                  key={student.id}
+                  student={student}
+                  onEdit={() => handleEditClick(student)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-       {/* pagination here  */}
-       <PaginationComponent
+        {/* pagination here  */}
+        <PaginationComponent
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage} // Pass the function to handle page change

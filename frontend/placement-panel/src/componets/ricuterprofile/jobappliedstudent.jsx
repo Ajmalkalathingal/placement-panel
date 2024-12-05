@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
   Badge,
-  Image,
   Spinner,
   Card,
   Row,
   Col,
   Container,
   Button,
-  Dropdown,
   Table,
 } from "react-bootstrap";
 import api from "../../api";
@@ -16,8 +14,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import InterviewDetailsModal from "./InterviewDetailsModal";
 
-const AppliedStudentList = () => {
-  const [students, setStudents] = useState([]);
+const JobAppliedStudent = () => {
+  const [appliedstudents, setStudents] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [error, setError] = useState(null);
@@ -26,7 +24,6 @@ const AppliedStudentList = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
-    // Fetch the recruiter's job posts on component mount
     const fetchJobs = async () => {
       try {
         const response = await api.get(`/api/jobs/`);
@@ -48,9 +45,7 @@ const AppliedStudentList = () => {
     // setStudents([]);
     setError(null);
     try {
-      const response = await api.get(
-        `/api/recruiter/job-applicants/${jobId}/`
-      );
+      const response = await api.get(`/api/recruiter/job-applicants/${jobId}/`);
       if (response.data) {
         setStudents(response.data);
       }
@@ -69,10 +64,13 @@ const AppliedStudentList = () => {
 
   const handleStatusChange = async (studentId, status) => {
     try {
-      const response = await api.patch(`/api/recruiter/job-applications/${studentId}/`, {
-        status,
-      });
-      console.log(response)
+      const response = await api.patch(
+        `/api/recruiter/job-applications/${studentId}/`,
+        {
+          status,
+        }
+      );
+      console.log(response);
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
           student.id === studentId ? { ...student, status } : student
@@ -105,44 +103,47 @@ const AppliedStudentList = () => {
     <Container className="mt-5">
       <h2 className="text-primary mb-4 text-center">Applied Students</h2>
       <Row className="justify-content-center">
-  {jobs.map((job) => (
-    <Col key={job.id} md={4} lg={3} className="mb-4">
-      <Card
-        className={`shadow-sm p-3 rounded-3 ${
-          selectedJob && selectedJob.id === job.id
-            ? "bg-primary text-white"
-            : "border-secondary"
-        }`}
-        onClick={() => handleJobSelection(job)}
-        style={{ cursor: "pointer", transition: "transform 0.2s" }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-      >
-        <Card.Body>
-          <Card.Title className="fs-5 mb-2 text-truncate">
-            {job.title}
-          </Card.Title>
-          <Card.Text className="text-muted mb-3 small">
-            Applications: {job.application_count}
-          </Card.Text>
-          <div className="mb-2">
-            <span className="badge bg-success text-white small">
-              {job.job_type.replace("-", " ").toUpperCase()}
-            </span>
-          </div>
-          <div className="text-muted small w-100 text-end">
-            <strong>Deadline:</strong>{" "}
-            <span className="fw-bold">
-              {new Date(job.deadline).toISOString().split("T")[0]}
-            </span>
-          </div>
-        </Card.Body>
-      </Card>
-    </Col>
-  ))}
-</Row>
-
-
+        {jobs.map((job) => (
+          <Col key={job.id} md={4} lg={3} className="mb-4">
+            <Card
+              className={`shadow-sm p-3 rounded-3 ${
+                selectedJob && selectedJob.id === job.id
+                  ? " text-primary"
+                  : "border-secondary"
+              }`}
+              style={{ cursor: "pointer", transition: "transform 0.2s" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.05)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <Card.Body>
+                <Card.Title className="fs-5 mb-2 text-truncate">
+                  {job.title}
+                </Card.Title>
+                <Card.Text className="text-muted mb-3 small">
+                  Applications: {job.application_count}
+                </Card.Text>
+                <div className="mb-2">
+                  <span className="badge bg-success text-white small">
+                    {job.job_type.replace("-", " ").toUpperCase()}
+                  </span>
+                </div>
+                <div className="text-muted small w-100 text-end">
+                  <strong>Deadline:</strong>{" "}
+                  <span className="fw-bold">
+                    {new Date(job.deadline).toISOString().split("T")[0]}
+                  </span>
+                </div>
+                <button className="btn btn-primary rounded" onClick={() => handleJobSelection(job)}>get applied studen</button>
+                <button className="btn btn-primary rounded" onClick={() => handleJobSelection(job)}>get selected student</button>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
       {loading ? (
         <div className="d-flex justify-content-center mt-5">
@@ -150,7 +151,7 @@ const AppliedStudentList = () => {
         </div>
       ) : error ? (
         <p className="text-center text-danger">{error}</p>
-      ) : students.length > 0 ? (
+      ) : appliedstudents.length > 0 ? (
         <Table striped bordered hover responsive className="mt-4">
           <thead className="table-primary">
             <tr>
@@ -167,7 +168,7 @@ const AppliedStudentList = () => {
             </tr>
           </thead>
           <tbody>
-            {students.map((student, index) => (
+            {appliedstudents.map((student, index) => (
               <tr key={student.id}>
                 <td>{index + 1}</td>
                 <td>{student.student.user.first_name}</td>
@@ -228,26 +229,26 @@ const AppliedStudentList = () => {
                 </td>
                 <td>
                   <div className="d-flex flex-column gap-2">
-                  {student.status === "rejected" ? (
-                        <Button
-                          variant="success"
-                          onClick={() =>
-                            handleStatusChange(student.id, "accepted")
-                          }
-                        >
-                          Accept
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="danger"
-                          className="me-2"
-                          onClick={() =>
-                            handleStatusChange(student.id, "rejected")
-                          }
-                        >
-                          Reject
-                        </Button>
-                      )}
+                    {student.status === "rejected" ? (
+                      <Button
+                        variant="success"
+                        onClick={() =>
+                          handleStatusChange(student.id, "accepted")
+                        }
+                      >
+                        Accept
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="danger"
+                        className="me-2"
+                        onClick={() =>
+                          handleStatusChange(student.id, "rejected")
+                        }
+                      >
+                        Reject
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -273,4 +274,5 @@ const AppliedStudentList = () => {
   );
 };
 
-export default AppliedStudentList;
+export default JobAppliedStudent;
+

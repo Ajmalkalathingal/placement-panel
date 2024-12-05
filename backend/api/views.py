@@ -506,6 +506,20 @@ class InterviewDetailsCreateView(generics.CreateAPIView):
         send_interview_email_task.delay(recruiter_email, student_email, subject, message)
 
 
+class SelectedStudentsView(APIView):
+    permission_classes = [IsRecruiter]
+    def get(self, request, job_id):
+        try:
+
+            job = Job.objects.get(id=job_id)
+            selected_applications = JobApplication.objects.filter(job=job, status="accepted")
+            serializer = JobApplicationSerializer(selected_applications, many=True)
+            
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Job.DoesNotExist:
+            return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
 class InterviewDetailsListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated,IsCoordinator | IsStudent]
     serializer_class = InterviewDetailsSerializer
@@ -515,6 +529,7 @@ class InterviewDetailsListView(generics.ListAPIView):
         return InterviewDetails.objects.filter(job_application__student__user=user, job_application__email_sent=True)
     
 
+# coordinator
 @api_view(['POST'])
 def create_placement_event(request):
     if request.method == 'POST':
@@ -542,7 +557,7 @@ class CordinatorProfileView(APIView):
         except CoordinatorProfile.DoesNotExist:
             return Response({"error": "coordinator profile not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
 
 
 # verifier section # 

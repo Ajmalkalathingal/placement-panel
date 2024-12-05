@@ -1,75 +1,72 @@
 import { useEffect, useState } from "react";
 import api from "../../api";
-import './rstyle.css';
-
+import "./rstyle.css";
 
 const Registration = () => {
-  const [courses, setCourses] = useState([]); 
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    registration_number: '',
-    name: '',
-    course: '',
-    duration: '',
-    starting_date: '',
-    ending_date: '',
+    registration_number: "",
+    name: "",
+    course: "",
+    duration: "",
+    starting_date: "",
+    ending_date: "",
     is_registered: false,
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await api.get("api/course-choices/");
-        setCourses(response.data); 
+        setCourses(response.data);
       } catch (error) {
         console.error("Error fetching course choices:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCourses(); 
+    fetchCourses();
   }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value 
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-  
+    setError("");
+    setSuccess("");
+
     try {
       const response = await api.post("api/register/", formData);
-      setSuccess('Registration successful!');
+      setSuccess("Registration successful!");
     } catch (error) {
       console.error("Error during registration:", error);
-  
+
       if (error.response && error.response.data) {
         const errorMessages = Object.values(error.response.data);
         setError(`Registration failed: ${errorMessages}`);
       } else {
-        setError('Registration failed. Please try again.');
+        setError("Registration failed. Please try again.");
       }
     }
   };
-  
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   return (
     <>
-<div className="card text-black" style={{ borderRadius: "25px" }}>
-
+      <div className="card text-black" style={{ borderRadius: "25px" }}>
         <p className="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
           Registration
         </p>
@@ -128,7 +125,9 @@ const Registration = () => {
                   className="form-control"
                   required
                 >
-                  <option value="" disabled>Select Course</option>
+                  <option value="" disabled>
+                    Select Course
+                  </option>
                   {courses.map((course) => (
                     <option key={course.value} value={course.value}>
                       {course.label}

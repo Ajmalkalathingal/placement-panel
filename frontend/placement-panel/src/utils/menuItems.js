@@ -30,6 +30,7 @@ import {
           { section: 'CreateJobpost', label: 'Create Job Post', icon: faBriefcase },
           { section: 'postlist', label: 'Post List', icon: faCalendar },
           { section: 'appliedStudents', label: 'Applied Students', icon: faUsers },
+          { section: 'selected Students', label: 'selected Students', icon: faUsers },
           { section: 'updateProfile', label: 'Edit Profile', icon: faEdit },
           { section: 'logout', label: 'Logout', icon: faSignOutAlt },
         ];

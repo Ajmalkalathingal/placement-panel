@@ -35,7 +35,8 @@ from .views import (
 
     InterviewDetailsCreateView,
     InterviewDetailsListView,
-
+    SelectedStudentsView,
+    
     create_placement_event,
     DisplayPlacemetEvets,
 
@@ -95,6 +96,8 @@ urlpatterns = [
     path('jobs-lists/', AllJobListView.as_view(), name='job-list'),
     path('jobs/<int:job_id>/apply/', apply_for_job, name='apply_for_job'),
     path('jobs/applied-list/', AppliedJobListView.as_view(), name='apply_for_job'),
+
+     path('api/jobs/<int:job_id>/selected-students/', SelectedStudentsView.as_view(), name='selected-students'),
 
     path('recruiter/job-applicants/<int:pk>/', JobApplicationsForRecruiterView.as_view(), name='job-applications-for-recruiter'),
     path('applications/unseen-count/', unseen_applications_count, name='unseen-applications-count'),

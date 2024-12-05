@@ -224,7 +224,6 @@ class PasswordResetToken(models.Model):
 
     @staticmethod
     def generate_encrypted_token():
-        # Generate a unique token and encrypt it with Fernet
         raw_token = uuid.uuid4().hex
         fernet = Fernet(settings.ENCRYPTION_KEY)
         return fernet.encrypt(raw_token.encode()).decode()

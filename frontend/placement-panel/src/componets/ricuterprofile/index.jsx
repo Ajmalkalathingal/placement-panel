@@ -1,21 +1,27 @@
 import { useEffect, useState } from "react";
 import "./style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faCalendar, faEdit } from "@fortawesome/free-solid-svg-icons";
 import RHome from "./RHome";
 import EditProfile from "./editprofile";
-import { getImageUrl } from "../../utils/utils";
 import CreateJobPost from "./create_post";
 import PostList from "./pos_list";
 import { getMenuItems } from "../../utils/menuItems";
-import AppliedStudentList from "./appliedstudentlist";
 import api from "../../api";
+import { getImageUrl } from "../../utils/utils";
+import JobAppliedStudent from "./jobappliedstudent";
 
 const RecruterProfile = ({ profile }) => {
   const menuItems = getMenuItems("Recruiter");
   const [activeSection, setActiveSection] = useState(menuItems[3].section);
   const [profiles, setProfile] = useState(profile);
+  let image = getImageUrl(profile.company_logo)
   const [unseenCount, setUnseenCount] = useState(0);
+
+  const [isSidebarVisible, setSidebarVisible] = useState(true);
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!isSidebarVisible);
+  };
 
   useEffect(() => {
     const fetchUnseenCount = async () => {
@@ -35,6 +41,7 @@ const RecruterProfile = ({ profile }) => {
 
   const handleSectionChange = (section) => {
     setActiveSection(section);
+    setSidebarVisible(!isSidebarVisible);
     if (section === "appliedStudents") {
       markApplicationsAsSeen();
       setUnseenCount(0);
@@ -45,36 +52,40 @@ const RecruterProfile = ({ profile }) => {
     setProfile(profiles);
   }, [profiles]);
 
-  const imageUrl = getImageUrl(profiles.company_logo);
 
- if (!profiles.is_active) {
-  return (
-    <div className="container mt-5">
-      <div className="card text-center shadow-sm">
-        <div className="card-body">
-          <div className="mb-4">
-            <img
-              src="https://img.icons8.com/ios-filled/100/000000/verification.png"
-              alt="Verification Icon"
-              style={{ opacity: 0.8 }}
-            />
-          </div>
-          <h5 className="card-title">Profile Verification in Progress</h5>
-          <p className="card-text text-secondary">
-            Please wait a moment while our team verifies your profile. Once
-            verified, it will be activated, and you can access all the features.
-          </p>
-          <div className="mt-3">
-            <button className="btn btn-primary" disabled>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              Verifying...
-            </button>
+  if (!profiles.is_active) {
+    return (
+      <div className="container mt-5">
+        <div className="card text-center shadow-sm">
+          <div className="card-body">
+            <div className="mb-4">
+              <img
+                src={"src/assets/images/logo2.png"}
+                alt="Verification Icon"
+                style={{ opacity: 0.8 }}
+              />
+            </div>
+            <h5 className="card-title">Profile Verification in Progress</h5>
+            <p className="card-text text-secondary">
+              Please wait a moment while our team verifies your profile. Once
+              verified, it will be activated, and you can access all the
+              features.
+            </p>
+            <div className="mt-3">
+              <button className="btn btn-primary" disabled>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Verifying...
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <>
@@ -91,13 +102,27 @@ const RecruterProfile = ({ profile }) => {
         </div>
         <div className="main-body">
           <div className="row">
-            <div className="col-lg-3">
-              <div className="card">
+            <div className="col-lg-2">
+              {window.innerWidth < 992 && (
+                <button
+                  className="btn btn-primary mb-3 d-lg-none"
+                  onClick={toggleSidebar}
+                >
+                  ☰ Menu
+                </button>
+              )}
+
+              {/* Sidebar, hidden on small screens if toggled */}
+              <div
+                className={`card ${
+                  isSidebarVisible ? "d-block" : "d-none"
+                } d-lg-block`}
+              >
                 <div className="card-body">
                   <div className="d-flex flex-column align-items-center text-center">
                     <img
                       src={
-                        imageUrl ||
+                        image ||
                         "https://bootdey.com/img/Content/avatar/avatar6.png"
                       }
                       alt="Admin"
@@ -120,7 +145,7 @@ const RecruterProfile = ({ profile }) => {
                   </div>
                   <hr className="my-4" />
 
-                  {/* Render Sidebar Component */}
+                  {/* Render Sidebar Menu */}
                   <ul className="p-1 mt-2 space" style={{ listStyle: "none" }}>
                     {menuItems.map((item) => (
                       <li
@@ -150,14 +175,14 @@ const RecruterProfile = ({ profile }) => {
               </div>
             </div>
 
-            <div className="col-lg-9">
+            <div className="col-lg-10">
               {/* Dynamically render sections based on activeSection */}
               {activeSection === "profile" && <RHome profile={profile} />}
               {activeSection === "CreateJobpost" && (
                 <CreateJobPost profile={profiles} />
               )}
               {activeSection === "postlist" && <PostList />}
-              {activeSection === "appliedStudents" && <AppliedStudentList />}
+              {activeSection === "appliedStudents" && <JobAppliedStudent />}
               {activeSection === "updateProfile" && (
                 <EditProfile
                   profile={profiles}

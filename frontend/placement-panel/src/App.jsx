@@ -15,6 +15,8 @@ import SignupCoordinator from './pages/signup/signUpCoordinator';
 import ResetPassword from './pages/resetPassword/resetPassword';
 import RequestPasswordReset from './pages/requestresetpassword/RequestPasswordReset ';
 import Index from './pages/home';
+import ContactUs from './componets/contact us/ContactUs';
+import Blog from './componets/PlacementBlog/Blog';
 
 function App() {
   
@@ -24,7 +26,9 @@ function App() {
       <div className="">
         <ToastContainer/>
         <Routes>
-        <Route path="/" element={<Index/>} />
+        <Route path="/" element={<Index/>}/>
+        <Route path="/" element={<ContactUs/>}/>
+        <Route path="/" element={<Blog/>}/>
         <Route path="/signup-for-student" element={<Signup />} />
         <Route path="/signup-for-recruiter" element={<SignUpRicuter />} />
         <Route path="/signup-for-coordinator" element={<SignupCoordinator />} />

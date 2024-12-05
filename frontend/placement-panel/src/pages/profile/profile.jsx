@@ -49,9 +49,9 @@ function Profile() {
           // Profile not found for recruiter, show registration form
           setIsRecruiter(true);
         } else if (status === 401 || status === 403) {
+          Cookies.remove(ACCESS_TOKEN);
+          Cookies.remove(REFRESH_TOKEN);
           setTokenExpired(true);
-          // Cookies.remove(ACCESS_TOKEN);
-          // Cookies.remove(REFRESH_TOKEN);
           // navigate('/login');
         } else {
           // Other errors, log error message or setError for display

@@ -1,4 +1,5 @@
 import Header from "../../componets/header";
+import './style.css';
 import { Link } from "react-router-dom";
 import {
   faUserGraduate,
@@ -11,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Swiper from "../../componets/swiper/swiper";
 import Footer from "../../componets/footer/footer";
 import Blog from "../../componets/PlacementBlog/Blog";
+import ContactUs from "../../componets/contact us/ContactUs";
 
 const Index = () => {
   const handleDownload = () => {
@@ -18,102 +20,102 @@ const Index = () => {
     const pdfUrl = "src/assets/pdf/placement brochure.pdf";
     const link = document.createElement("a");
     link.href = pdfUrl;
-    link.download = "placement-report.pdf"; 
+    link.download = "placement-report.pdf";
     link.click();
   };
   return (
     <>
       <div>
         <section className="header-section">
-        <Header />
+          <Header />
         </section>
 
         {/* user section */}
         <section className="user-section">
-        <div className="container">
-          <div className="row mt-4">
-            <div className="col-12 col-md-3 mb-4">
-              <Link
-                to={"/signup-for-student"}
-                className="card shadow-sm hover-shadow rounded-lg hover-card"
-              >
-                <div className="card-body text-center">
-                  <FontAwesomeIcon
-                    icon={faUserGraduate}
-                    size="4x"
-                    className="text-primary mb-3"
-                  />
-                  <h5 className="card-title">Student</h5>
-                  <p className="card-text">
-                    Sign up as a student to access placement resources and apply
-                    for opportunities.
-                  </p>
-                </div>
-              </Link>
-            </div>
+          <div className="container">
+            <div className="row mt-4">
+              <div className="col-12 col-md-3 mb-4">
+                <Link
+                  to={"/signup-for-student"}
+                  className="card shadow-sm hover-shadow rounded-lg hover-card"
+                >
+                  <div className="card-body text-center">
+                    <FontAwesomeIcon
+                      icon={faUserGraduate}
+                      size="4x"
+                      className="text-primary mb-3"
+                    />
+                    <h5 className="card-title">Student</h5>
+                    <p className="card-text">
+                      Sign up as a student to access placement resources and
+                      apply for opportunities.
+                    </p>
+                  </div>
+                </Link>
+              </div>
 
-            <div className="col-12 col-md-3 mb-4">
-              <Link
-                to={"/signup-for-recruiter"}
-                className="card shadow-sm hover-shadow rounded-lg hover-card"
-              >
-                <div className="card-body text-center">
-                  <FontAwesomeIcon
-                    icon={faBriefcase}
-                    size="4x"
-                    className="text-primary mb-3"
-                  />
-                  <h5 className="card-title">Recruiter</h5>
-                  <p className="card-text">
-                    Sign up as a recruiter to post job openings and connect with
-                    students.
-                  </p>
-                </div>
-              </Link>
-            </div>
+              <div className="col-12 col-md-3 mb-4">
+                <Link
+                  to={"/signup-for-recruiter"}
+                  className="card shadow-sm hover-shadow rounded-lg hover-card"
+                >
+                  <div className="card-body text-center">
+                    <FontAwesomeIcon
+                      icon={faBriefcase}
+                      size="4x"
+                      className="text-primary mb-3"
+                    />
+                    <h5 className="card-title">Recruiter</h5>
+                    <p className="card-text">
+                      Sign up as a recruiter to post job openings and connect
+                      with students.
+                    </p>
+                  </div>
+                </Link>
+              </div>
 
-            <div className="col-12 col-md-3 mb-4">
-              <Link
-                to={"/signup-for-coordinator"}
-                className="card shadow-sm hover-shadow rounded-lg hover-card"
-              >
-                <div className="card-body text-center">
-                  <FontAwesomeIcon
-                    icon={faChalkboardTeacher}
-                    size="4x"
-                    className="text-primary mb-3"
-                  />
-                  <h5 className="card-title">Coordinator</h5>
-                  <p className="card-text">
-                    Sign up as a coordinator to manage events and track
-                    placements.
-                  </p>
-                </div>
-              </Link>
-            </div>
+              <div className="col-12 col-md-3 mb-4">
+                <Link
+                  to={"/signup-for-coordinator"}
+                  className="card shadow-sm hover-shadow rounded-lg hover-card"
+                >
+                  <div className="card-body text-center">
+                    <FontAwesomeIcon
+                      icon={faChalkboardTeacher}
+                      size="4x"
+                      className="text-primary mb-3"
+                    />
+                    <h5 className="card-title">Coordinator</h5>
+                    <p className="card-text">
+                      Sign up as a coordinator to manage events and track
+                      placements.
+                    </p>
+                  </div>
+                </Link>
+              </div>
 
-            <div className="col-12 col-md-3 mb-4">
-              <Link
-                to={"/login"}
-                className="card shadow-sm hover-shadow rounded-lg hover-card"
-              >
-                <div className="card-body text-center">
-                  <FontAwesomeIcon
-                    icon={faUsersCog}
-                    size="4x"
-                    className="text-primary mb-3"
-                  />
-                  <h5 className="card-title">Verifier</h5>
-                  <p className="card-text">
-                    Log-in as a Verifier manage events and track.
-                  </p>
-                </div>
-              </Link>
+              <div className="col-12 col-md-3 mb-4">
+                <Link
+                  to={"/login"}
+                  className="card shadow-sm hover-shadow rounded-lg hover-card"
+                >
+                  <div className="card-body text-center">
+                    <FontAwesomeIcon
+                      icon={faUsersCog}
+                      size="4x"
+                      className="text-primary mb-3"
+                    />
+                    <h5 className="card-title">Verifier</h5>
+                    <p className="card-text">
+                      Log-in as a Verifier manage events and track.
+                    </p>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
         </section>
-        
+
         {/* about section */}
         <section
           id="#about"
@@ -145,14 +147,22 @@ const Index = () => {
         </section>
         {/* end about section */}
 
+        {/* placemet section */}
+        <section className="container">
+        <div className="">
+          <h3 className="text-center"><strong >Recent Placement</strong></h3>
+                  </div>
+          <Swiper />
+        </section>
+        {/* end placment section */}
+
         {/* blog section */}
         <section>
-        <Blog />
+          <Blog />
         </section>
         {/* end blog section */}
 
-
-        <div className="container-fuid m-3">
+        <div id="why-dcms" className="container-fuid m-3">
           <div className="row">
             {/* Left Section */}
             <div className="col-md-9">
@@ -244,12 +254,10 @@ const Index = () => {
           </div>
         </div>
 
-        {/* placemet section */}
-        <section className="container">
-              <h2>Recent Placement</h2>
-            <Swiper />
-        </section>
-        {/* end placment section */}
+        {/* contact us section */}
+        <ContactUs/>
+        {/* end section */}
+
 
         {/* footer section */}
         <Footer />

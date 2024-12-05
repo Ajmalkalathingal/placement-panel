@@ -4,6 +4,6 @@ export const getImageUrl = (imagePath) => {
 };
 
 
-export const redirectToLogin = () => {
-    window.location.href = '/login'; // Fallback if you aren't using React Router or if the interceptor is outside a component
-};
+// export const redirectToLogin = () => {
+//     window.location.href = '/login'; 
+// };
